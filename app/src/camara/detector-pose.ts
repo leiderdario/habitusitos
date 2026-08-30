@@ -49,9 +49,25 @@ export interface Detector {
 }
 
 async function existeLocal(ruta: string): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  // En despliegues web (Vercel, etc.), los binarios pesados (WASM/modelos) no estan en Git
+  // y cualquier ruta no encontrada devuelve index.html (SPA). Por ello, en la web siempre
+  // se carga directamente desde el CDN fijado.
+  const esLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname.endsWith(".local");
+
+  if (!esLocalhost) return false;
+
   try {
     const r = await fetch(ruta, { method: "HEAD" });
-    return r.ok;
+    if (!r.ok) return false;
+    const tipo = r.headers.get("content-type");
+    if (tipo && tipo.toLowerCase().includes("text/html")) {
+      return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -68,76 +84,88 @@ export async function crearDetector(): Promise<Detector> {
   // inicial y el prototipo tardaria en abrir aunque nadie use la camara.
   const { FilesetResolver, PoseLandmarker } = await import("@mediapipe/tasks-vision");
 
-  const hayLocal = await existeLocal(RUTA_MODELO_LOCAL);
-  const origen: "local" | "cdn" = hayLocal ? "local" : "cdn";
+  const intentarCrear = async (usarLocal: boolean): Promise<Detector> => {
+    const origen: "local" | "cdn" = usarLocal ? "local" : "cdn";
+    const rutaWasm = usarLocal ? RUTA_WASM_LOCAL : RUTA_WASM_CDN;
+    const rutaModelo = usarLocal ? RUTA_MODELO_LOCAL : RUTA_MODELO_CDN;
 
-  const vision = await FilesetResolver.forVisionTasks(
-    hayLocal ? RUTA_WASM_LOCAL : RUTA_WASM_CDN,
-  );
+    const vision = await FilesetResolver.forVisionTasks(rutaWasm);
 
-  const landmarker = await PoseLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath: hayLocal ? RUTA_MODELO_LOCAL : RUTA_MODELO_CDN,
-      // GPU cuando se puede; la libreria cae a CPU sola si no hay soporte.
-      delegate: "GPU",
-    },
-    runningMode: "VIDEO",
-    numPoses: 1,
-    minPoseDetectionConfidence: 0.5,
-    minPosePresenceConfidence: 0.5,
-    minTrackingConfidence: 0.5,
-    outputSegmentationMasks: false,
-  });
+    const landmarker = await PoseLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: rutaModelo,
+        // GPU cuando se puede; la libreria cae a CPU sola si no hay soporte.
+        delegate: "GPU",
+      },
+      runningMode: "VIDEO",
+      numPoses: 1,
+      minPoseDetectionConfidence: 0.5,
+      minPosePresenceConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+      outputSegmentationMasks: false,
+    });
 
-  let ultimoTiempo = -1;
+    let ultimoTiempo = -1;
 
-  return {
-    origen,
-    detectar(video, tMs) {
-      // `detectForVideo` exige timestamps estrictamente crecientes. Repetir uno
-      // lanza, y una excepcion por frame tumbaria el bucle entero.
-      if (tMs <= ultimoTiempo) return null;
-      ultimoTiempo = tMs;
+    return {
+      origen,
+      detectar(video, tMs) {
+        // `detectForVideo` exige timestamps estrictamente crecientes. Repetir uno
+        // lanza, y una excepcion por frame tumbaria el bucle entero.
+        if (tMs <= ultimoTiempo) return null;
+        ultimoTiempo = tMs;
 
-      try {
-        const resultado = landmarker.detectForVideo(video, tMs);
-        const puntos = resultado.landmarks?.[0];
-        const puntosMundo = resultado.worldLandmarks?.[0];
-        if (!puntos || puntos.length < 25) return null;
+        try {
+          const resultado = landmarker.detectForVideo(video, tMs);
+          const puntos = resultado.landmarks?.[0];
+          const puntosMundo = resultado.worldLandmarks?.[0];
+          if (!puntos || puntos.length < 25) return null;
 
-        return {
-          landmarks: puntos.map((p) => ({
-            x: p.x,
-            y: p.y,
-            z: p.z,
-            visibility: p.visibility ?? 1,
-          })),
-          // worldLandmarks es null si el modelo no lo devolvio esta vez: nunca se
-          // inventa un vector 3D a partir de coordenadas proyectivas.
-          worldLandmarks:
-            puntosMundo && puntosMundo.length >= 25
-              ? puntosMundo.map((p) => ({
-                  x: p.x,
-                  y: p.y,
-                  z: p.z,
-                  visibility: p.visibility ?? 1,
-                }))
-              : null,
-        };
-      } catch {
-        // Mismo contrato que el pipeline del proyecto original: un frame
-        // problematico nunca detiene el bucle de camara.
-        return null;
-      }
-    },
-    cerrar() {
-      try {
-        landmarker.close();
-      } catch {
-        /* cerrar dos veces no es un error que valga la pena propagar */
-      }
-    },
+          return {
+            landmarks: puntos.map((p) => ({
+              x: p.x,
+              y: p.y,
+              z: p.z,
+              visibility: p.visibility ?? 1,
+            })),
+            // worldLandmarks es null si el modelo no lo devolvio esta vez: nunca se
+            // inventa un vector 3D a partir de coordenadas proyectivas.
+            worldLandmarks:
+              puntosMundo && puntosMundo.length >= 25
+                ? puntosMundo.map((p) => ({
+                    x: p.x,
+                    y: p.y,
+                    z: p.z,
+                    visibility: p.visibility ?? 1,
+                  }))
+                : null,
+          };
+        } catch {
+          // Mismo contrato que el pipeline del proyecto original: un frame
+          // problematico nunca detiene el bucle de camara.
+          return null;
+        }
+      },
+      cerrar() {
+        try {
+          landmarker.close();
+        } catch {
+          /* cerrar dos veces no es un error que valga la pena propagar */
+        }
+      },
+    };
   };
+
+  const hayLocal = await existeLocal(RUTA_MODELO_LOCAL);
+  if (hayLocal) {
+    try {
+      return await intentarCrear(true);
+    } catch {
+      return await intentarCrear(false);
+    }
+  }
+
+  return await intentarCrear(false);
 }
 
 /** Pares de landmarks a unir para dibujar el esqueleto sobre el video. */
