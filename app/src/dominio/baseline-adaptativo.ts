@@ -86,7 +86,6 @@ export const OPTIMO_ERGONOMICO: MetricasPostura = {
   nivelHombros: 0.94,
   rotacionHombros: 0.92,
   alineacionColumna: 0.9,
-  rotacionCabeza: 0.93,
   inclinacionLateralCabeza: 0.94,
 };
 

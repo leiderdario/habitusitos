@@ -85,11 +85,10 @@ export const config = {
 } as const;
 
 /**
- * Pesos por defecto de las siete metricas geometricas.
- * Valor heredado tal cual del proyecto original (seccion 4.8, DEFAULT_POSTURE_WEIGHTS).
+ * Pesos por defecto de las seis metricas geometricas.
  * El orden importa y coincide con `ORDEN_METRICAS` en dominio/puntaje.ts.
  */
-export const PESOS_POR_DEFECTO = [0.2, 0.2, 0.15, 0.15, 0.15, 0.1, 0.05] as const;
+export const PESOS_POR_DEFECTO = [0.25, 0.25, 0.15, 0.15, 0.15, 0.05] as const;
 
 /**
  * Umbrales de sensibilidad de cada metrica: el valor de desviacion en el que la
@@ -106,7 +105,6 @@ export const UMBRALES_POR_DEFECTO = {
   nivelHombros: 0.06,
   rotacionHombros: 0.12,
   alineacionColumna: 30,
-  rotacionCabeza: 0.35,
   inclinacionLateralCabeza: 0.05,
 } as const;
 

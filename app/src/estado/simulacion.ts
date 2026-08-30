@@ -200,7 +200,6 @@ function metricasDesdeNivel(n: number): MetricasPostura {
   const hombrosNivel = clamp(0.9 + n * 0.08 + g(0.015));
   const hombrosRot = clamp(0.88 + n * 0.1 + g(0.02));
   const columna = clamp(n * 0.85 + 0.15 + g(0.03));
-  const rotCabeza = clamp(0.92 + n * 0.06 + g(0.015));
   const ladeo = clamp(0.94 + n * 0.05 + g(0.01));
 
   return {
@@ -209,7 +208,6 @@ function metricasDesdeNivel(n: number): MetricasPostura {
     nivelHombros: hombrosNivel,
     rotacionHombros: hombrosRot,
     alineacionColumna: columna,
-    rotacionCabeza: rotCabeza,
     inclinacionLateralCabeza: ladeo,
   };
 }

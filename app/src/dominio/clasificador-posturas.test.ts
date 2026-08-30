@@ -30,7 +30,6 @@ const METRICAS_OPTIMAS: MetricasPostura = {
   nivelHombros: 1,
   rotacionHombros: 1,
   alineacionColumna: 1,
-  rotacionCabeza: 1,
   inclinacionLateralCabeza: 1,
 };
 

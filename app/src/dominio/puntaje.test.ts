@@ -21,7 +21,7 @@ const U = UMBRALES_POR_DEFECTO;
 const P = PESOS_POR_DEFECTO;
 
 describe("calcularMetricas", () => {
-  it("da 1.0 en las siete metricas con la postura ideal", () => {
+  it("da 1.0 en las seis metricas con la postura ideal", () => {
     const m = calcularMetricas(POSTURA_PERFECTA, U);
     for (const nombre of ORDEN_METRICAS) {
       expect(m[nombre], `metrica ${nombre}`).toBeCloseTo(1, 5);
@@ -56,7 +56,6 @@ describe("calcularMetricas", () => {
       { campo: "cabezaAdelante", valor: 0.2, metrica: "inclinacionCabeza" },
       { campo: "desnivelHombros", valor: 0.03, metrica: "nivelHombros" },
       { campo: "giroTorso", valor: 0.06, metrica: "rotacionHombros" },
-      { campo: "giroCabeza", valor: 0.25, metrica: "rotacionCabeza" },
       { campo: "ladeoCabeza", valor: 0.03, metrica: "inclinacionLateralCabeza" },
     ] as const;
 
@@ -143,16 +142,16 @@ describe("calcularMetricas", () => {
 
 describe("normalizarPesos", () => {
   it("normaliza a suma 1 conservando las proporciones", () => {
-    const n = normalizarPesos([2, 2, 1.5, 1.5, 1.5, 1, 0.5]);
+    const n = normalizarPesos([2.5, 2.5, 1.5, 1.5, 1.5, 0.5]);
     expect(n.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 10);
     expect(n).toEqual(normalizarPesos(P));
   });
 
   it("rechaza vectores invalidos en vez de producir puntajes silenciosamente malos", () => {
     expect(() => normalizarPesos([1, 2, 3])).toThrow();
-    expect(() => normalizarPesos([1, 1, 1, 1, 1, 1, -1])).toThrow();
-    expect(() => normalizarPesos([0, 0, 0, 0, 0, 0, 0])).toThrow();
-    expect(() => normalizarPesos([1, 1, 1, 1, 1, 1, NaN])).toThrow();
+    expect(() => normalizarPesos([1, 1, 1, 1, 1, -1])).toThrow();
+    expect(() => normalizarPesos([0, 0, 0, 0, 0, 0])).toThrow();
+    expect(() => normalizarPesos([1, 1, 1, 1, 1, NaN])).toThrow();
   });
 });
 
@@ -169,15 +168,15 @@ describe("calcularPuntaje", () => {
   });
 
   it("respeta el peso relativo de cada metrica", () => {
-    // El cuello pesa 0.20 y el ladeo de cabeza 0.05: la misma caida relativa en
-    // el cuello debe costar cuatro veces mas puntos.
+    // El cuello pesa 0.25 y el ladeo de cabeza 0.05: la misma caida relativa en
+    // el cuello debe costar cinco veces mas puntos.
     const metricas = calcularMetricas(POSTURA_PERFECTA, U);
     const conCuelloMalo = calcularPuntaje({ ...metricas, cuelloVertical: 0 }, P);
     const conLadeoMalo = calcularPuntaje(
       { ...metricas, inclinacionLateralCabeza: 0 },
       P,
     );
-    expect(100 - conCuelloMalo.puntaje).toBeCloseTo(20, 5);
+    expect(100 - conCuelloMalo.puntaje).toBeCloseTo(25, 5);
     expect(100 - conLadeoMalo.puntaje).toBeCloseTo(5, 5);
   });
 
@@ -199,7 +198,7 @@ describe("evaluarFrame", () => {
   });
 
   it("devuelve null si los pesos son invalidos, sin propagar la excepcion", () => {
-    expect(evaluarFrame(POSTURA_PERFECTA, U, [0, 0, 0, 0, 0, 0, 0])).toBeNull();
+    expect(evaluarFrame(POSTURA_PERFECTA, U, [0, 0, 0, 0, 0, 0])).toBeNull();
   });
 });
 
@@ -219,13 +218,12 @@ describe("compuerta de visibilidad y disponibilidad", () => {
     expect(res.disponibilidad.cuelloVertical).toBe(true);
     expect(res.disponibilidad.nivelHombros).toBe(true);
     expect(res.disponibilidad.rotacionHombros).toBe(true);
-    expect(res.disponibilidad.rotacionCabeza).toBe(true);
     expect(res.disponibilidad.inclinacionLateralCabeza).toBe(true);
   });
 
   it("renormaliza pesos entre las metricas disponibles sin penalizar al usuario", () => {
     const metricas = calcularMetricas(POSTURA_PERFECTA, U);
-    // Sin columna disponible (las otras 6 en perfecto 1.0)
+    // Sin columna disponible (las otras 5 en perfecto 1.0)
     const res = calcularPuntaje(metricas, P, {
       alineacionColumna: false,
     });

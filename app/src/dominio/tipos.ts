@@ -72,7 +72,7 @@ export const PUNTO = {
   CADERA_DER: 24,
 } as const;
 
-/** Las siete metricas geometricas, en el orden en que se ponderan. */
+/** Las seis metricas geometricas, en el orden en que se ponderan. */
 export interface MetricasPostura {
   /** 1 · Cabeza adelantada ("text neck"): profundidad nariz vs. orejas. */
   inclinacionCabeza: number;
@@ -84,9 +84,7 @@ export interface MetricasPostura {
   rotacionHombros: number;
   /** 5 · Angulo de la columna respecto a la vertical ideal. */
   alineacionColumna: number;
-  /** 6 · Cabeza girada: distancia entre orejas vs. la esperada. */
-  rotacionCabeza: number;
-  /** 7 · Cabeza ladeada: diferencia de altura entre orejas. */
+  /** 6 · Cabeza ladeada: diferencia de altura entre orejas. */
   inclinacionLateralCabeza: number;
 }
 

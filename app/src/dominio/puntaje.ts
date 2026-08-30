@@ -38,7 +38,6 @@ export const ORDEN_METRICAS: readonly NombreMetrica[] = [
   "nivelHombros",
   "rotacionHombros",
   "alineacionColumna",
-  "rotacionCabeza",
   "inclinacionLateralCabeza",
 ] as const;
 
@@ -48,7 +47,6 @@ export const ETIQUETA_METRICA: Record<NombreMetrica, string> = {
   nivelHombros: "Hombros nivelados",
   rotacionHombros: "Torso de frente",
   alineacionColumna: "Espalda alineada",
-  rotacionCabeza: "Cabeza al frente",
   inclinacionLateralCabeza: "Cabeza sin ladear",
 };
 
@@ -60,18 +58,16 @@ export const AYUDA_METRICA: Record<NombreMetrica, string> = {
   nivelHombros: "Si un hombro esta mas alto que el otro.",
   rotacionHombros: "Si el torso esta girado en vez de mirar al frente.",
   alineacionColumna: "Cuanto se inclina tu espalda respecto a la vertical.",
-  rotacionCabeza: "Si la cabeza esta girada hacia un lado.",
   inclinacionLateralCabeza: "Si la cabeza esta ladeada hacia un hombro.",
 };
 
-/** Landmarks requeridos por cada una de las siete metricas para ser confiable. */
+/** Landmarks requeridos por cada una de las seis metricas para ser confiable. */
 export const PUNTOS_POR_METRICA: Record<NombreMetrica, readonly number[]> = {
   inclinacionCabeza: [PUNTO.NARIZ, PUNTO.OREJA_IZQ, PUNTO.OREJA_DER],
   cuelloVertical: [PUNTO.HOMBRO_IZQ, PUNTO.HOMBRO_DER, PUNTO.OREJA_IZQ, PUNTO.OREJA_DER],
   nivelHombros: [PUNTO.HOMBRO_IZQ, PUNTO.HOMBRO_DER],
   rotacionHombros: [PUNTO.HOMBRO_IZQ, PUNTO.HOMBRO_DER],
   alineacionColumna: [PUNTO.CADERA_IZQ, PUNTO.CADERA_DER, PUNTO.HOMBRO_IZQ, PUNTO.HOMBRO_DER],
-  rotacionCabeza: [PUNTO.HOMBRO_IZQ, PUNTO.HOMBRO_DER, PUNTO.OREJA_IZQ, PUNTO.OREJA_DER],
   inclinacionLateralCabeza: [PUNTO.OREJA_IZQ, PUNTO.OREJA_DER],
 } as const;
 
@@ -81,12 +77,10 @@ export interface UmbralesMetricas {
   nivelHombros: number;
   rotacionHombros: number;
   alineacionColumna: number;
-  rotacionCabeza: number;
   inclinacionLateralCabeza: number;
 }
 
 const VERTICAL_IDEAL_DEFAULT: [number, number, number] = [0, -1, 0];
-const PROPORCION_OREJAS_HOMBROS = 0.7;
 
 const normalizar = (desviacion: number, umbral: number) =>
   acotar(1 - desviacion / umbral, 0, 1);
@@ -163,13 +157,7 @@ export function calcularMetricas(
       umbrales.alineacionColumna,
     );
 
-    // 6. Rotacion de cabeza
-    const rotacionCabeza = normalizar(
-      Math.abs(orejaDer.z - orejaIzq.z),
-      umbrales.rotacionCabeza * 0.25,
-    );
-
-    // 7. Inclinacion lateral de cabeza (Coronal cervical)
+    // 6. Inclinacion lateral de cabeza (Coronal cervical)
     const dxCervical = Math.abs(cadena.tope.x - cadena.base.x);
     const dyCervical = Math.max(0.01, Math.abs(cadena.tope.y - cadena.base.y));
     const anguloLateral = (Math.atan2(dxCervical, dyCervical) * 180) / Math.PI;
@@ -181,7 +169,6 @@ export function calcularMetricas(
       nivelHombros,
       rotacionHombros,
       alineacionColumna,
-      rotacionCabeza,
       inclinacionLateralCabeza,
     };
   }
@@ -227,17 +214,6 @@ export function calcularMetricas(
     umbrales.alineacionColumna,
   );
 
-  const anchoHombros = Math.hypot(hombroIzq.x - hombroDer.x, hombroIzq.y - hombroDer.y);
-  const distanciaOrejas = Math.hypot(orejaIzq.x - orejaDer.x, orejaIzq.y - orejaDer.y);
-  const idealOrejas = anchoHombros * PROPORCION_OREJAS_HOMBROS;
-  const rotacionCabeza =
-    idealOrejas === 0
-      ? 1
-      : normalizar(
-          Math.abs(distanciaOrejas - idealOrejas) / idealOrejas,
-          umbrales.rotacionCabeza,
-        );
-
   const inclinacionLateralCabeza = normalizar(
     Math.abs(orejaIzq.y - orejaDer.y),
     umbrales.inclinacionLateralCabeza,
@@ -249,7 +225,6 @@ export function calcularMetricas(
     nivelHombros,
     rotacionHombros,
     alineacionColumna,
-    rotacionCabeza,
     inclinacionLateralCabeza,
   };
 }
@@ -279,7 +254,6 @@ export function calcularMetricasConDisponibilidad(
     nivelHombros: visiblePara(puntos, PUNTOS_POR_METRICA.nivelHombros, umbralVisibilidad),
     rotacionHombros: visiblePara(puntos, PUNTOS_POR_METRICA.rotacionHombros, umbralVisibilidad),
     alineacionColumna: visiblePara(puntos, PUNTOS_POR_METRICA.alineacionColumna, umbralVisibilidad),
-    rotacionCabeza: visiblePara(puntos, PUNTOS_POR_METRICA.rotacionCabeza, umbralVisibilidad),
     inclinacionLateralCabeza: visiblePara(puntos, PUNTOS_POR_METRICA.inclinacionLateralCabeza, umbralVisibilidad),
   };
 
@@ -315,7 +289,6 @@ export function calcularPuntaje(
     nivelHombros: disponibilidad?.nivelHombros !== false,
     rotacionHombros: disponibilidad?.rotacionHombros !== false,
     alineacionColumna: disponibilidad?.alineacionColumna !== false,
-    rotacionCabeza: disponibilidad?.rotacionCabeza !== false,
     inclinacionLateralCabeza: disponibilidad?.inclinacionLateralCabeza !== false,
   };
 
@@ -325,7 +298,6 @@ export function calcularPuntaje(
     nivelHombros: 0,
     rotacionHombros: 0,
     alineacionColumna: 0,
-    rotacionCabeza: 0,
     inclinacionLateralCabeza: 0,
   };
 

@@ -107,7 +107,6 @@ export const CALIBRACION_INICIAL: MetricasPostura = {
   nivelHombros: 0.91,
   rotacionHombros: 0.88,
   alineacionColumna: 0.85,
-  rotacionCabeza: 0.9,
   inclinacionLateralCabeza: 0.92,
 };
 

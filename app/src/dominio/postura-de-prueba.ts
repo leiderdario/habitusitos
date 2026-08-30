@@ -153,7 +153,6 @@ export function metricasUniformes(valor: number): MetricasPostura {
     nivelHombros: valor,
     rotacionHombros: valor,
     alineacionColumna: valor,
-    rotacionCabeza: valor,
     inclinacionLateralCabeza: valor,
   };
 }

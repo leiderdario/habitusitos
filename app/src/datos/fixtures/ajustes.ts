@@ -109,9 +109,9 @@ export const AJUSTES_POR_DEFECTO: Ajustes = {
 };
 
 /**
- * Presets de sensibilidad de las siete metricas.
+ * Presets de sensibilidad de las seis metricas.
  *
- * Se ofrecen presets etiquetados en vez de siete campos numericos sueltos
+ * Se ofrecen presets etiquetados en vez de seis campos numericos sueltos
  * porque nadie que no haya escrito el algoritmo sabe que significa subir el peso
  * de `rotacionHombros` a 0.22. Los numeros siguen disponibles para quien quiera
  * afinarlos; el preset es la puerta de entrada.
@@ -125,7 +125,7 @@ export const PRESETS_PESOS: {
   {
     id: "equilibrado",
     nombre: "Equilibrado",
-    descripcion: "El reparto por defecto, heredado del proyecto original.",
+    descripcion: "El reparto por defecto con ponderacion equilibrada.",
     pesos: [...PESOS_POR_DEFECTO],
   },
   {
@@ -133,19 +133,20 @@ export const PRESETS_PESOS: {
     nombre: "Enfocado en el cuello",
     descripcion:
       "Prioriza cabeza adelantada y angulo de cuello. Util si trabajas con portatil sin soporte.",
-    pesos: [0.3, 0.3, 0.1, 0.1, 0.1, 0.07, 0.03],
+    pesos: [0.35, 0.35, 0.1, 0.1, 0.07, 0.03],
   },
   {
     id: "espalda",
     nombre: "Enfocado en la espalda",
     descripcion: "Prioriza la alineacion de columna y los hombros.",
-    pesos: [0.12, 0.15, 0.2, 0.18, 0.25, 0.06, 0.04],
+    pesos: [0.12, 0.15, 0.22, 0.2, 0.27, 0.04],
   },
   {
     id: "simetria",
     nombre: "Enfocado en la simetria",
     descripcion:
       "Prioriza estar de frente y sin ladear. Util si te recuestas sobre un codo.",
-    pesos: [0.1, 0.12, 0.22, 0.2, 0.11, 0.15, 0.1],
+    pesos: [0.1, 0.15, 0.28, 0.25, 0.12, 0.1],
   },
 ];
+
