@@ -212,20 +212,21 @@ export function VistaCamara({
       <div className="bg-muted relative aspect-4/3 overflow-hidden rounded-xl">
         <video
           ref={videoRef}
+          autoPlay
+          playsInline
+          muted
           className={cn(
             "size-full object-cover",
             "-scale-x-100",
             estado === "activa" ? "opacity-100" : "opacity-0",
           )}
-          playsInline
-          muted
         />
         <canvas
           ref={lienzoRef}
           width={640}
           height={480}
           className={cn(
-            "absolute inset-0 size-full -scale-x-100",
+            "pointer-events-none absolute inset-0 size-full -scale-x-100",
             estado === "activa" ? "opacity-100" : "opacity-0",
           )}
           aria-hidden

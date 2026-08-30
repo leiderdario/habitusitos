@@ -87,12 +87,27 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
 
       const video = videoRef.current;
       if (!video) throw new Error("El elemento de video no esta montado");
+      
       video.srcObject = flujo;
-      await video.play();
+
+      // Esperar a que el video tenga datos listos para reproducir
+      await new Promise<void>((resolve) => {
+        if (video.readyState >= 2) {
+          resolve();
+        } else {
+          video.onloadeddata = () => resolve();
+          // Timeout de seguridad por si el evento ya disparo
+          window.setTimeout(resolve, 800);
+        }
+      });
+
+      try {
+        await video.play();
+      } catch (err) {
+        console.warn("video.play() diferido por politica del navegador:", err);
+      }
 
       // Si el usuario desconecta la camara a mitad de sesion, el track termina.
-      // Sin esto la interfaz se quedaria congelada mostrando el ultimo frame,
-      // que es peor que decir la verdad.
       flujo.getVideoTracks()[0]?.addEventListener("ended", () => {
         setError("camara-desconectada");
         setEstado("error");
@@ -105,21 +120,24 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
       temporizadorRef.current = window.setInterval(() => {
         const v = videoRef.current;
         const d = detectorRef.current;
-        if (!v || !d || v.readyState < 2) return;
-        setPose(d.detectar(v, performance.now()));
+        if (!v || !d || v.readyState < 2 || v.videoWidth === 0) return;
+        const resPose = d.detectar(v, performance.now());
+        setPose(resPose);
       }, intervalo);
     } catch (e) {
+      console.error("Error al activar la camara:", e);
       setError(traducirFalloDeMedios(e));
       setEstado("error");
       apagar();
-      setEstado("error");
     }
   }, [apagar, muestrasPorSegundo]);
 
-  // Liberar la camara al desmontar. Sin esto el LED de la webcam se queda
-  // encendido, que es la queja de usabilidad numero uno documentada contra este
-  // tipo de aplicaciones.
-  useEffect(() => apagar, [apagar]);
+  // Liberar la camara al desmontar el componente
+  useEffect(() => {
+    return () => {
+      apagar();
+    };
+  }, [apagar]);
 
   return { estado, error, origenRecursos, videoRef, pose, encender, apagar };
 }

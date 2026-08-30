@@ -91,19 +91,35 @@ export async function crearDetector(): Promise<Detector> {
 
     const vision = await FilesetResolver.forVisionTasks(rutaWasm);
 
-    const landmarker = await PoseLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: rutaModelo,
-        // GPU cuando se puede; la libreria cae a CPU sola si no hay soporte.
-        delegate: "GPU",
-      },
-      runningMode: "VIDEO",
-      numPoses: 1,
-      minPoseDetectionConfidence: 0.5,
-      minPosePresenceConfidence: 0.5,
-      minTrackingConfidence: 0.5,
-      outputSegmentationMasks: false,
-    });
+    let landmarker: Awaited<ReturnType<typeof PoseLandmarker.createFromOptions>>;
+    try {
+      landmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: rutaModelo,
+          delegate: "GPU",
+        },
+        runningMode: "VIDEO",
+        numPoses: 1,
+        minPoseDetectionConfidence: 0.5,
+        minPosePresenceConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+        outputSegmentationMasks: false,
+      });
+    } catch (eGpu) {
+      console.warn("GPU WebGL no disponible para MediaPipe, cayendo a CPU:", eGpu);
+      landmarker = await PoseLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: rutaModelo,
+          delegate: "CPU",
+        },
+        runningMode: "VIDEO",
+        numPoses: 1,
+        minPoseDetectionConfidence: 0.5,
+        minPosePresenceConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+        outputSegmentationMasks: false,
+      });
+    }
 
     let ultimoTiempo = -1;
 
@@ -122,7 +138,7 @@ export async function crearDetector(): Promise<Detector> {
           if (!puntos || puntos.length < 25) return null;
 
           return {
-            landmarks: puntos.map((p) => ({
+            landmarks: puntos.map((p: { x: number; y: number; z: number; visibility?: number }) => ({
               x: p.x,
               y: p.y,
               z: p.z,
@@ -132,7 +148,7 @@ export async function crearDetector(): Promise<Detector> {
             // inventa un vector 3D a partir de coordenadas proyectivas.
             worldLandmarks:
               puntosMundo && puntosMundo.length >= 25
-                ? puntosMundo.map((p) => ({
+                ? puntosMundo.map((p: { x: number; y: number; z: number; visibility?: number }) => ({
                     x: p.x,
                     y: p.y,
                     z: p.z,
