@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Sistema de diseno Habitusitos — direccion "Calma, no vigilancia"
+
+   Teal sereno #0891B2 · acento verde #059669 · Plus Jakarta Sans · WCAG 2.2 AA.
+
+   La seccion 9.1 del prompt maestro prohibe explicitamente los rojos agresivos
+   tipo alarma de incendio: esto es una app de bienestar, no un sistema de
+   monitoreo. Por eso el estado "corrige" usa un ladrillo apagado y no #DC2626.
+
+   REGLA DURA: ningun componente escribe un hex crudo. Todo color sale de un
+   token semantico de este archivo. Si falta un token, se anade aqui.
+
+   El detalle y la justificacion de cada decision estan en
+   ../../docs/SISTEMA_DISENO.md.
+   --------------------------------------------------------------------------- */
+
+@theme inline {
+  /* Mapeo estandar shadcn/ui */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Tokens de dominio — estado postural.
+     Existen porque el estado nunca se comunica solo con color (WCAG 1.4.1):
+     cada uno viaja SIEMPRE acompanado de una forma de icono distinta y de
+     texto + numero. Ver componentes/comunes/insignia-estado.tsx. */
+  --color-estado-buena: var(--estado-buena);
+  --color-estado-buena-suave: var(--estado-buena-suave);
+  --color-estado-regular: var(--estado-regular);
+  --color-estado-regular-suave: var(--estado-regular-suave);
+  --color-estado-corrige: var(--estado-corrige);
+  --color-estado-corrige-suave: var(--estado-corrige-suave);
+  --color-estado-pausa: var(--estado-pausa);
+  --color-estado-pausa-suave: var(--estado-pausa-suave);
+
+  /* Tokens de dominio — baseline adaptativo (aporte 1 de tesis).
+     La distincion aceptada/rechazada es LA evidencia visual de que la
+     salvaguarda anti-deriva esta funcionando. Merece token propio. */
+  --color-baseline-aceptada: var(--baseline-aceptada);
+  --color-baseline-rechazada: var(--baseline-rechazada);
+  --color-baseline-linea: var(--baseline-linea);
+
+  /* Aviso de que esto es una demostracion, no producto. */
+  --color-demo: var(--demo);
+  --color-demo-suave: var(--demo-suave);
+
+  /* Graficas: escala monocroma teal + un ambar de contraste.
+     NUNCA rojo/verde como unico par (≈8% de los hombres son daltonicos). */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Mapa de calor del calendario: escala monocroma de 5 pasos + vacio. */
+  --color-calor-0: var(--calor-0);
+  --color-calor-1: var(--calor-1);
+  --color-calor-2: var(--calor-2);
+  --color-calor-3: var(--calor-3);
+  --color-calor-4: var(--calor-4);
+  --color-calor-5: var(--calor-5);
+
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  --background: oklch(0.985 0.008 210);
+  --foreground: oklch(0.22 0.035 232);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.035 232);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.035 232);
+
+  --primary: oklch(0.55 0.098 222); /* #0E7490 — teal sereno, AA sobre blanco */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.955 0.014 210);
+  --secondary-foreground: oklch(0.33 0.045 232);
+  --muted: oklch(0.958 0.01 215);
+  --muted-foreground: oklch(0.48 0.028 230); /* 4.6:1 sobre --background */
+  --accent: oklch(0.56 0.116 163); /* #059669 */
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.52 0.17 27);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.9 0.014 220);
+  --input: oklch(0.9 0.014 220);
+  --ring: oklch(0.55 0.098 222);
+
+  /* Estado postural — los tres valores pasan AA (>=4.5:1) sobre --card. */
+  --estado-buena: oklch(0.5 0.084 178); /* #0F766E teal profundo */
+  --estado-buena-suave: oklch(0.955 0.032 175);
+  --estado-regular: oklch(0.56 0.128 62); /* #B45309 ambar */
+  --estado-regular-suave: oklch(0.962 0.048 85);
+  --estado-corrige: oklch(0.5 0.163 28); /* #B42318 ladrillo, no alarma */
+  --estado-corrige-suave: oklch(0.958 0.028 25);
+  --estado-pausa: oklch(0.5 0.02 240); /* gris azulado: ausencia, no falla */
+  --estado-pausa-suave: oklch(0.955 0.008 240);
+
+  --baseline-aceptada: oklch(0.5 0.084 178);
+  --baseline-rechazada: oklch(0.62 0.045 250);
+  --baseline-linea: oklch(0.45 0.12 285);
+
+  --demo: oklch(0.48 0.114 62);
+  --demo-suave: oklch(0.968 0.056 92);
+
+  --chart-1: oklch(0.55 0.098 222);
+  --chart-2: oklch(0.68 0.096 200);
+  --chart-3: oklch(0.34 0.062 235);
+  --chart-4: oklch(0.66 0.145 62);
+  --chart-5: oklch(0.56 0.04 245);
+
+  --calor-0: oklch(0.945 0.006 220);
+  --calor-1: oklch(0.9 0.036 200);
+  --calor-2: oklch(0.82 0.062 197);
+  --calor-3: oklch(0.71 0.084 200);
+  --calor-4: oklch(0.6 0.096 210);
+  --calor-5: oklch(0.47 0.088 220);
+}
+
+.dark {
+  --background: oklch(0.185 0.026 235);
+  --foreground: oklch(0.955 0.01 210);
+  --card: oklch(0.235 0.028 235);
+  --card-foreground: oklch(0.955 0.01 210);
+  --popover: oklch(0.235 0.028 235);
+  --popover-foreground: oklch(0.955 0.01 210);
+
+  /* El teal oscuro no alcanza contraste sobre fondo oscuro: sube de luminancia. */
+  --primary: oklch(0.76 0.104 205);
+  --primary-foreground: oklch(0.19 0.03 235);
+  --secondary: oklch(0.3 0.03 235);
+  --secondary-foreground: oklch(0.94 0.012 210);
+  --muted: oklch(0.29 0.026 235);
+  --muted-foreground: oklch(0.73 0.024 225); /* 4.7:1 sobre --background */
+  --accent: oklch(0.76 0.132 165);
+  --accent-foreground: oklch(0.19 0.03 235);
+  --destructive: oklch(0.68 0.15 25);
+  --destructive-foreground: oklch(0.19 0.03 235);
+
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.76 0.104 205);
+
+  --estado-buena: oklch(0.82 0.114 178);
+  --estado-buena-suave: oklch(0.35 0.05 178);
+  --estado-regular: oklch(0.84 0.13 82);
+  --estado-regular-suave: oklch(0.36 0.058 70);
+  --estado-corrige: oklch(0.75 0.128 27);
+  --estado-corrige-suave: oklch(0.35 0.07 25);
+  --estado-pausa: oklch(0.72 0.02 240);
+  --estado-pausa-suave: oklch(0.32 0.014 240);
+
+  --baseline-aceptada: oklch(0.82 0.114 178);
+  --baseline-rechazada: oklch(0.6 0.038 250);
+  --baseline-linea: oklch(0.74 0.128 290);
+
+  --demo: oklch(0.83 0.13 88);
+  --demo-suave: oklch(0.34 0.056 78);
+
+  --chart-1: oklch(0.76 0.104 205);
+  --chart-2: oklch(0.62 0.09 215);
+  --chart-3: oklch(0.86 0.07 195);
+  --chart-4: oklch(0.8 0.135 72);
+  --chart-5: oklch(0.66 0.036 235);
+
+  --calor-0: oklch(0.28 0.014 232);
+  --calor-1: oklch(0.36 0.038 218);
+  --calor-2: oklch(0.46 0.062 212);
+  --calor-3: oklch(0.58 0.084 205);
+  --calor-4: oklch(0.7 0.096 200);
+  --calor-5: oklch(0.83 0.096 195);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* El cursor de mano es una senal de affordance, no decoracion. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Anillo de foco siempre visible: nunca se retira por estetica (WCAG 2.4.7). */
+  :focus-visible {
+    @apply outline-ring outline-2 outline-offset-2;
+  }
+}
+
+@layer utilities {
+  /* Cifras tabulares en scores, duraciones y metricas: sin esto el ancho salta
+     al cambiar de digito y toda la fila parece temblar. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Franja diagonal del aviso de demostracion. */
+  .franja-demo {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 6px,
+      var(--demo-suave) 6px,
+      var(--demo-suave) 12px
+    );
+  }
+}
+
+/* Toda animacion cede ante la preferencia del sistema (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

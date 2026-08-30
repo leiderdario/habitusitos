@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    // `node` hace falta para src/arquitectura.test.ts, que lee el arbol de
+    // archivos para verificar la regla de dependencias entre capas.
+    "types": ["vite/client", "node"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Alias @/ -> src/. Obligatorio en codigo nuevo: nunca rutas relativas que
+       suban mas de un nivel (../../).
+       Sin `baseUrl`: TypeScript 6 lo marca como obsoleto y deja de funcionar en
+       la 7. Las rutas de `paths` se resuelven contra este archivo. */
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src"]
+}

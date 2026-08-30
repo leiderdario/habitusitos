@@ -1,0 +1,124 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+3 0 obj
+<< /Length 5583 >>
+stream
+BT /F2 19.0 Tf 1 0 0 1 56.00 785.89 Tm (Protocolo de la prueba con usuarios) Tj ET
+BT /F1 9.5 Tf 1 0 0 1 56.00 759.89 Tm (Guion para quien aplica la prueba. No es para el participante.) Tj ET
+BT /F1 8.5 Tf 1 0 0 1 56.00 743.19 Tm (Habitusitos - Monitor de postura por webcam | Trabajo de grado, Ingenieria de Software, Universidad de Cartagena) Tj ET
+q 0.60 w 0.75 0.75 0.75 RG 56.00 723.49 m 539.28 723.49 l S Q
+BT /F2 12.5 Tf 1 0 0 1 56.00 703.49 Tm (Antes de empezar) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 687.49 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 687.49 Tm (Confirma que el equipo tiene Windows 10 u 11 y una camara que funcione.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 672.29 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 672.29 Tm (Entrega el consentimiento informado y espera a que lo lea. No lo resumas tu.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 657.09 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 657.09 Tm (Anota el codigo de participante en la ficha de incidencias.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 641.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 641.89 Tm (Pide que cierre las videollamadas abiertas: si otra aplicacion tiene la camara, la) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 628.69 Tm (instalacion parece fallar cuando en realidad esta ocupada.) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 605.49 Tm (Fase 1 - Instalacion \(5 minutos\)) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 589.49 Tm (No ayudes salvo que la persona se bloquee mas de dos minutos. El objetivo de esta fase es medir) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 576.29 Tm (si alguien puede instalar la aplicacion SIN asistencia. Cada vez que intervienes, se pierde ese) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 563.09 Tm (dato.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 545.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 545.89 Tm (Entrega el instalador y la guia rapida. Nada mas.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 530.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 530.69 Tm (Cronometra desde el doble clic hasta que la aplicacion abra.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 515.49 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 515.49 Tm (Anota cualquier alerta del antivirus o de SmartScreen: es un obstaculo conocido de los) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 502.29 Tm (ejecutables sin firma digital.) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 479.09 Tm (Fase 2 - Configuracion inicial \(2 minutos\)) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 463.09 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 463.09 Tm (Observa si lee la pantalla de privacidad o la salta.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 447.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 447.89 Tm (Anota si duda al elegir camara.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 432.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 432.69 Tm (En la calibracion, fijate si POSA para la camara. Es el error mas comun y arruina la) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 419.49 Tm (referencia: la instruccion dice que se siente como siempre, no perfecto.) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 396.29 Tm (Fase 3 - Sesion de uso \(segun lo acordado\)) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 380.29 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 380.29 Tm (Pide que trabaje normalmente. No debe actuar para la camara.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 365.09 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 365.09 Tm (Anota cada aviso: si lo vio, si le molesto, si corrigio la postura.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 349.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 349.89 Tm (Anota si la aplicacion se quedo sin responder o consumio demasiado el equipo.) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 326.69 Tm (Fase 4 - Cierre) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 310.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 310.69 Tm (Abre el panel con la persona y pidele que interprete lo que ve, en voz alta.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 295.49 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 295.49 Tm (Pregunta si entiende que significa el puntaje. No se lo expliques antes.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 280.29 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 280.29 Tm (Pregunta si la volveria a usar manana, y por que si o por que no.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 265.09 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 265.09 Tm (Exporta sus datos si autorizo compartirlos y guarda el archivo con su codigo.) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 241.89 Tm (Preguntas de cierre - textuales) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 225.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 225.89 Tm (En una frase, para que crees que sirve esta aplicacion?) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 210.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 210.69 Tm (Hubo algun momento en que te molestara? Cuando?) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 195.49 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 195.49 Tm (Hubo algo que no entendiste o que te confundio?) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 180.29 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 180.29 Tm (Que le quitarias? Que le agregarias?) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 165.09 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 165.09 Tm (Del 1 al 5, que tan probable es que la sigas usando?) Tj ET
+BT /F2 12.5 Tf 1 0 0 1 56.00 141.89 Tm (Que NO hacer) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 125.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 125.89 Tm (No expliques el algoritmo. Si preguntan, responde despues de la prueba.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 110.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 110.69 Tm (No corrijas la postura de la persona: falsearias la medicion.) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Habitusitos - Protocolo de la prueba con usuarios) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 493.28 38.00 Tm (Pagina 1 de 2) Tj ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 601 >>
+stream
+BT /F1 10.0 Tf 1 0 0 1 56.00 785.89 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 785.89 Tm (No arregles el equipo del participante. Registra el problema y sigue.) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 56.00 770.69 Tm (-) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 770.69 Tm (No descartes una incidencia por parecer menor. Una confusion de treinta segundos en una) Tj ET
+BT /F1 10.0 Tf 1 0 0 1 70.00 757.49 Tm (prueba son quince minutos perdidos en produccion.) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Habitusitos - Protocolo de la prueba con usuarios) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 493.28 38.00 Tm (Pagina 2 de 2) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+8 0 obj
+<< /Title (Protocolo de la prueba con usuarios - Habitusitos) /Producer (Habitusitos - generador de documentos de prueba) >>
+endobj
+9 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000112 00000 n 
+0000000214 00000 n 
+0000005849 00000 n 
+0000005991 00000 n 
+0000006643 00000 n 
+0000006785 00000 n 
+0000006848 00000 n 
+0000006988 00000 n 
+trailer
+<< /Size 10 /Root 9 0 R /Info 8 0 R >>
+startxref
+7037
+%%EOF

@@ -1,0 +1,30 @@
+# Dependencias y artefactos de build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Recursos de MediaPipe: ~50 MB de binarios que NO se versionan.
+# Se regeneran con:  cd app && npm run preparar-camara
+# Si no estan, el detector cae al CDN con la version fijada.
+app/public/wasm/
+app/public/modelos/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor y sistema operativo
+.vscode/*
+!.vscode/extensions.json
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Registros y temporales
+*.log
+npm-debug.log*
+.env
+.env.local
