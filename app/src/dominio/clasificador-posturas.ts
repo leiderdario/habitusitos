@@ -70,7 +70,7 @@ export const DIAGNOSTICO_PATRON: Record<PatronPostural, string> = {
   apoyo_asimetrico_codo: "Estas recostando el peso sobre un brazo o codo.",
   torsion_lateral: "Tienes el torso o la cabeza girados hacia un lado.",
   cabeza_ladeada: "Tienes la cabeza ladeada hacia un hombro.",
-  postura_desconocida: "No se pudo ver bien tu postura en este momento.",
+  postura_desconocida: "No se pudo ver suficiente de tu postura desde este angulo. Intenta ajustar la camara.",
   sin_datos: "Sin medicion activa de camara.",
 };
 

@@ -53,6 +53,7 @@ import type {
   CalibracionPostural,
   FilaBaseline,
   FramePose,
+  Landmark,
   MetricasDisponibilidad,
   MetricasPostura,
   MuestraPuntaje,
@@ -88,6 +89,33 @@ interface TramoGuion {
   segundos: number;
 }
 
+export interface EstadoPersona {
+  id: string; // "local" para el modo personal, o el desk_id/track_id en modo oficina
+  pose: FramePose | null;
+  puntaje: number;
+  puntajeSuavizado: number;
+  metricas: MetricasPostura;
+  metricasAjustadas: MetricasPostura;
+  aportes: MetricasPostura;
+  disponibilidadMetricas?: MetricasDisponibilidad;
+  maquina: EstadoMaquina;
+  presentacion: PresentacionEstado;
+  clasificacion: EstadoClasificacion;
+}
+
+export interface CamaraOficinaLocal {
+  id: number | string;
+  nombre: string;
+  tipo?: string;
+}
+
+export type EstadoConexionVisionNode =
+  | { tipo: "inactivo" }
+  | { tipo: "conectando" }
+  | { tipo: "conectado_sin_personas" }
+  | { tipo: "conectado_con_personas"; cantidad: number }
+  | { tipo: "desconectado"; motivo?: string };
+
 interface EstadoSimulacion {
   listo: boolean;
   corriendo: boolean;
@@ -99,13 +127,9 @@ interface EstadoSimulacion {
   /** Puntaje crudo del ultimo frame. Alimenta el sparkline y el historial. */
   puntaje: number;
   /**
-   * Puntaje suavizado — ES EL QUE SE MUESTRA.
-   *
-   * El criterio de aceptacion del RF-1 exige "un score de postura estable, sin
-   * saltos erraticos frame a frame". Ensenar el valor crudo lo incumple: a cinco
-   * muestras por segundo el numero baila, el semaforo parpadea y el desglose se
-   * vuelve ilegible. El proyecto original ya resuelve esto con una ventana movil
-   * (`score_window_size`); aqui se replica.
+   * Puntaje filtrado con media movil exponencial. Es el que gobierna las
+   * transiciones de la maquina y el medidor de aguja para que la interfaz no
+   * parpadee en cada frame.
    */
   puntajeSuavizado: number;
   /** Metricas crudas del frame, antes de ajustar por baseline. */
@@ -120,6 +144,18 @@ interface EstadoSimulacion {
   baseline: EstadoBaseline;
   historialBaseline: FilaBaseline[];
   notificaciones: Notificacion[];
+
+  /** Mapa de personas evaluadas simultaneamente (Paso 1 mejora.md: "local" o track_id). */
+  personas: Map<string, EstadoPersona>;
+
+  /** Estado de conexion con el servidor Vision Node (Paso 1 mejora.md feedback). */
+  estadoConexionVisionNode: EstadoConexionVisionNode;
+  actualizarConexionVisionNode(estado: EstadoConexionVisionNode): void;
+
+  /** Fuentes de cámara detectadas en el servidor de oficina. */
+  camarasOficinaDisponibles: CamaraOficinaLocal[];
+  fuenteOficinaActual: number | string;
+  actualizarFuentesOficina(fuenteActual: number | string, camarasDisponibles: CamaraOficinaLocal[]): void;
 
   ajustes: Ajustes;
 
@@ -143,7 +179,11 @@ interface EstadoSimulacion {
   detener(): void;
   alternar(): void;
   activarModoCamara(activo: boolean): void;
-  /** Entrada del modo camara. null = no se detecto persona. */
+  /** Entrada del modo camara para persona especifica (aditivo para N personas). */
+  empujarLandmarksDePersona(id: string, pose: FramePose | null): void;
+  /** Entrada en lote atomica para N personas en modo oficina (evita re-renders en rafaga). */
+  empujarLotePersonasOficina(personas: Array<{ track_id: number; keypoints: Landmark[] }>): void;
+  /** Entrada del modo camara. Delega en empujarLandmarksDePersona("local", pose). */
   empujarLandmarks(pose: FramePose | null): void;
   aplicarAjustes(ajustes: Ajustes): void;
   ejecutarEscenario(id: string, tramos: TramoGuion[]): void;
@@ -155,6 +195,7 @@ interface EstadoSimulacion {
   /** Borra la calibracion de la postura neutra. */
   limpiarCalibracionPostural(): void;
 }
+
 
 const DT = () => 1 / Math.max(1, config.MUESTRAS_POR_SEGUNDO);
 
@@ -249,6 +290,16 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
   baseline: crearBaseline(CALIBRACION_INICIAL),
   historialBaseline: [],
   notificaciones: [],
+  personas: new Map<string, EstadoPersona>(),
+  estadoConexionVisionNode: { tipo: "inactivo" },
+  actualizarConexionVisionNode(estado) {
+    set({ estadoConexionVisionNode: estado });
+  },
+  camarasOficinaDisponibles: [],
+  fuenteOficinaActual: 0,
+  actualizarFuentesOficina(fuenteActual, camarasDisponibles) {
+    set({ fuenteOficinaActual: fuenteActual, camarasOficinaDisponibles: camarasDisponibles });
+  },
   ajustes: AJUSTES_POR_DEFECTO,
   perspectiva: "frente",
   cambiarPerspectiva(perspectiva) {
@@ -272,6 +323,19 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
     const metricasIniciales = metricasDesdeNivel(0.86);
     const resultado = calcularPuntaje(metricasIniciales, AJUSTES_POR_DEFECTO.deteccion.pesos);
 
+    const personaLocalInicial: EstadoPersona = {
+      id: "local",
+      pose: null,
+      puntaje: resultado.puntaje,
+      puntajeSuavizado: resultado.puntaje,
+      metricas: metricasIniciales,
+      metricasAjustadas: metricasIniciales,
+      aportes: resultado.aportes,
+      maquina: crearMaquina(),
+      presentacion: PRESENTACION.buena,
+      clasificacion: ESTADO_CLASIFICACION_INICIAL,
+    };
+
     set({
       listo: true,
       t: sesion.segundosTranscurridos,
@@ -283,6 +347,7 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
       aportes: resultado.aportes,
       baseline: baselineResumen.estado,
       historialBaseline: historial,
+      personas: new Map([["local", personaLocalInicial]]),
     });
 
     get().iniciar();
@@ -343,42 +408,171 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
   },
 
   empujarLandmarks(pose) {
+    get().empujarLandmarksDePersona("local", pose);
+  },
+
+  empujarLandmarksDePersona(id, pose) {
     const s = get();
     if (!s.corriendo) return;
     const dt = DT();
 
-    if (!pose || !pose.landmarks || pose.landmarks.length < 25) {
-      const t = s.t + dt;
-      const maquina = avanzar(s.maquina, null, t, configAlertas(s.ajustes));
-      set({
-        t,
-        muestras: [...s.muestras, { t, score: 0, detectado: false }].slice(-MAX_MUESTRAS),
-        maquina: maquina.estado,
-        presentacion: PRESENTACION[maquina.estado.estado],
+    if (id === "local") {
+      if (!pose || !pose.landmarks || pose.landmarks.length < 25) {
+        const t = s.t + dt;
+        const maquina = avanzar(s.maquina, null, t, configAlertas(s.ajustes));
+        const pers = new Map(s.personas);
+        pers.set("local", {
+          id: "local",
+          pose: null,
+          puntaje: 0,
+          puntajeSuavizado: 0,
+          metricas: s.metricas,
+          metricasAjustadas: s.metricasAjustadas,
+          aportes: s.aportes,
+          maquina: maquina.estado,
+          presentacion: PRESENTACION[maquina.estado.estado],
+          clasificacion: s.clasificacion,
+        });
+        set({
+          t,
+          muestras: [...s.muestras, { t, score: 0, detectado: false }].slice(-MAX_MUESTRAS),
+          maquina: maquina.estado,
+          presentacion: PRESENTACION[maquina.estado.estado],
+          personas: pers,
+        });
+        return;
+      }
+
+      const poseTransformada = aplicarPerspectivaAPose(pose, s.perspectiva);
+
+      const res = calcularMetricasConDisponibilidad(
+        poseTransformada.landmarks,
+        s.ajustes.deteccion.umbrales,
+        s.calibracionPostural.offsetZ,
+        s.calibracionPostural.vectorArriba ?? undefined,
+        config.UMBRAL_VISIBILIDAD_LANDMARK,
+        poseTransformada.worldLandmarks,
+      );
+
+      procesarMuestra(
+        res.metricas,
+        dt,
+        set,
+        get,
+        poseTransformada,
+        res.disponibilidad,
+      );
+    } else {
+      // Entrada para personas en modo oficina (N personas)
+      const pers = new Map(s.personas);
+      if (!pose || !pose.landmarks || pose.landmarks.length < 25) {
+        pers.delete(id);
+        set({ personas: pers });
+        return;
+      }
+
+      const res = calcularMetricasConDisponibilidad(
+        pose.landmarks,
+        s.ajustes.deteccion.umbrales,
+        0,
+        undefined,
+        config.UMBRAL_VISIBILIDAD_LANDMARK,
+        pose.worldLandmarks,
+      );
+
+      const resultado = calcularPuntaje(res.metricas, s.ajustes.deteccion.pesos, res.disponibilidad);
+      const prev = s.personas.get(id);
+      const maquinaPrev = prev ? prev.maquina : crearMaquina();
+      const transicion = avanzar(maquinaPrev, resultado.puntaje, s.t, configAlertas(s.ajustes));
+      const alpha = 0.2;
+      const puntajeSuavizado = prev ? Math.round(prev.puntajeSuavizado * (1 - alpha) + resultado.puntaje * alpha) : resultado.puntaje;
+
+      pers.set(id, {
+        id,
+        pose,
+        puntaje: resultado.puntaje,
+        puntajeSuavizado,
+        metricas: res.metricas,
+        metricasAjustadas: res.metricas,
+        aportes: resultado.aportes,
+        disponibilidadMetricas: res.disponibilidad,
+        maquina: transicion.estado,
+        presentacion: PRESENTACION[transicion.estado.estado],
+        clasificacion: ESTADO_CLASIFICACION_INICIAL,
       });
-      return;
+
+      set({ personas: pers });
+    }
+  },
+
+  empujarLotePersonasOficina(listaPersonas) {
+    const s = get();
+    if (!s.corriendo) return;
+
+    const pers = new Map(s.personas);
+    const activeIds = new Set(listaPersonas.map((p) => `persona_${p.track_id}`));
+
+    // Descartar personas que ya no aparecen en el encuadre
+    for (const [id] of pers) {
+      if (id !== "local" && !activeIds.has(id)) {
+        pers.delete(id);
+      }
     }
 
-    const poseTransformada = aplicarPerspectivaAPose(pose, s.perspectiva);
+    const umbralVis = config.UMBRAL_VISIBILIDAD_LANDMARK;
+    const pesos = s.ajustes.deteccion.pesos;
+    const umbrales = s.ajustes.deteccion.umbrales;
+    const cfgAlertas = configAlertas(s.ajustes);
 
-    const res = calcularMetricasConDisponibilidad(
-      poseTransformada.landmarks,
-      s.ajustes.deteccion.umbrales,
-      s.calibracionPostural.offsetZ,
-      s.calibracionPostural.vectorArriba ?? undefined,
-      config.UMBRAL_VISIBILIDAD_LANDMARK,
-      poseTransformada.worldLandmarks,
-    );
+    for (const p of listaPersonas) {
+      const id = `persona_${p.track_id}`;
+      const kpts = p.keypoints;
+      if (!kpts || kpts.length < 25) {
+        pers.delete(id);
+        continue;
+      }
 
-    procesarMuestra(
-      res.metricas,
-      dt,
-      set,
-      get,
-      poseTransformada,
-      res.disponibilidad,
-    );
+      const pose: FramePose = {
+        landmarks: kpts,
+        worldLandmarks: kpts,
+      };
+
+      const res = calcularMetricasConDisponibilidad(
+        kpts,
+        umbrales,
+        0,
+        undefined,
+        umbralVis,
+        kpts,
+      );
+
+      const resultado = calcularPuntaje(res.metricas, pesos, res.disponibilidad);
+      const prev = s.personas.get(id);
+      const maquinaPrev = prev ? prev.maquina : crearMaquina();
+      const transicion = avanzar(maquinaPrev, resultado.puntaje, s.t, cfgAlertas);
+      const alpha = 0.25;
+      const puntajeSuavizado = prev
+        ? Math.round(prev.puntajeSuavizado * (1 - alpha) + resultado.puntaje * alpha)
+        : resultado.puntaje;
+
+      pers.set(id, {
+        id,
+        pose,
+        puntaje: resultado.puntaje,
+        puntajeSuavizado,
+        metricas: res.metricas,
+        metricasAjustadas: res.metricas,
+        aportes: resultado.aportes,
+        disponibilidadMetricas: res.disponibilidad,
+        maquina: transicion.estado,
+        presentacion: PRESENTACION[transicion.estado.estado],
+        clasificacion: ESTADO_CLASIFICACION_INICIAL,
+      });
+    }
+
+    set({ personas: pers });
   },
+
 
   marcarPosturaNeutra(pose) {
     if (!pose || !pose.landmarks) return;
@@ -547,6 +741,21 @@ function procesarMuestra(
         ].slice(-600)
       : historialBaseline;
 
+  const pers = new Map(s.personas);
+  pers.set("local", {
+    id: "local",
+    pose: pose ?? null,
+    puntaje: resultado.puntaje,
+    puntajeSuavizado: resultadoVista.puntaje,
+    metricas,
+    metricasAjustadas: metricasVista,
+    aportes: resultadoVista.aportes,
+    disponibilidadMetricas: disponibilidad,
+    maquina: transicion.estado,
+    presentacion: PRESENTACION[transicion.estado.estado],
+    clasificacion: nuevaClasificacion,
+  });
+
   set({
     t,
     puntaje: resultado.puntaje,
@@ -565,5 +774,7 @@ function procesarMuestra(
     historialBaseline: nuevaFila,
     clasificacion: nuevaClasificacion,
     notificaciones: notificaciones.slice(-4),
+    personas: pers,
   });
 }
+

@@ -90,6 +90,12 @@ export const CATALOGO_ERRORES: Record<
       "La camara dejo de responder a mitad de la sesion. Tus datos hasta este momento estan guardados.",
     accion: "Reanudar seguimiento",
   },
+  "servidor-desconectado": {
+    titulo: "No pudimos conectar con la camara de oficina",
+    mensaje:
+      "El servicio vision-node no responde en ws://127.0.0.1:8765. Asegurate de iniciarlo en tu equipo ejecutando: python -m vision_node.main",
+    accion: "Reintentar conexion",
+  },
   "permiso-denegado": {
     titulo: "No nos diste permiso para usar la camara",
     mensaje:

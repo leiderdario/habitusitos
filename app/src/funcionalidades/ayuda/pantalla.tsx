@@ -30,6 +30,7 @@ const GRUPOS: { titulo: string; descripcion: string; codigos: CodigoError[] }[] 
       "permiso-denegado",
       "camara-ocupada",
       "camara-desconectada",
+      "servidor-desconectado",
     ],
   },
   {

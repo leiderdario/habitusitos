@@ -83,7 +83,7 @@ export const OPCIONES_PERSPECTIVA: readonly {
 ] as const;
 
 /**
- * Transforma los puntos 3D de la pose para compensar el angulo de la camara
+ * Transforma los puntos 3D y proyecta los landmarks 2D de la pose para compensar el angulo de la camara
  * segun la perspectiva seleccionada (frente, lado o diagonal).
  */
 export function aplicarPerspectivaAPose(
@@ -106,9 +106,42 @@ export function aplicarPerspectivaAPose(
     };
   });
 
+  // Recalcular landmarks 2D proyectados horizontalmente para coherencia visual en pantalla (Paso 3)
+  const rad = (-angulo * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+
+  const caderaIzq = pose.landmarks[PUNTO.CADERA_IZQ];
+  const caderaDer = pose.landmarks[PUNTO.CADERA_DER];
+  const hombroIzq = pose.landmarks[PUNTO.HOMBRO_IZQ];
+  const hombroDer = pose.landmarks[PUNTO.HOMBRO_DER];
+
+  let centroX = 0.5;
+  if (caderaIzq && caderaDer && (caderaIzq.visibility ?? 1) >= 0.2 && (caderaDer.visibility ?? 1) >= 0.2) {
+    centroX = (caderaIzq.x + caderaDer.x) / 2;
+  } else if (hombroIzq && hombroDer && (hombroIzq.visibility ?? 1) >= 0.2 && (hombroDer.visibility ?? 1) >= 0.2) {
+    centroX = (hombroIzq.x + hombroDer.x) / 2;
+  } else if (pose.landmarks.length > 0) {
+    centroX = pose.landmarks.reduce((acc, pt) => acc + pt.x, 0) / pose.landmarks.length;
+  }
+
+  const landmarksTransformados = pose.landmarks.map((p) => {
+    const dx = p.x - centroX;
+    const dz = p.z;
+    const dxRot = dx * cos + dz * sin;
+    const dzRot = -dx * sin + dz * cos;
+    return {
+      x: centroX + dxRot,
+      y: p.y,
+      z: dzRot,
+      visibility: p.visibility,
+    };
+  });
+
   return {
-    landmarks: pose.landmarks,
+    landmarks: landmarksTransformados,
     worldLandmarks: worldLandmarksTransformados,
   };
 }
+
 

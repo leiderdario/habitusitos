@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PESOS_POR_DEFECTO, UMBRALES_POR_DEFECTO } from "@/config/app.config";
 import {
+  MINIMO_METRICAS_VISIBLES,
   ORDEN_METRICAS,
   calcularMetricas,
   calcularMetricasConDisponibilidad,
@@ -256,3 +257,40 @@ describe("calcularMetricas con worldLandmarks metricos 3D", () => {
     expect(m.inclinacionCabeza).toBeLessThan(0.7);
   });
 });
+
+describe("degradacion de gracia y MINIMO_METRICAS_VISIBLES (Pasos 3 y 4 mejora.md)", () => {
+  it("define MINIMO_METRICAS_VISIBLES como constante configurable en 3", () => {
+    expect(MINIMO_METRICAS_VISIBLES).toBe(3);
+  });
+
+  it("degrada con gracia recalculando el puntaje proporcionalmente cuando faltan 2 o 3 metricas", () => {
+    const metricas = calcularMetricas(POSTURA_PERFECTA, U);
+    // Excluir 2 metricas (columna y rotacion de hombros)
+    const res = calcularPuntaje(metricas, P, {
+      alineacionColumna: false,
+      rotacionHombros: false,
+    });
+
+    // Con las 4 restantes en 1.0, el puntaje debe renormalizarse al 100%
+    expect(res.puntaje).toBeCloseTo(100, 3);
+    expect(res.aportes.alineacionColumna).toBe(0);
+    expect(res.aportes.rotacionHombros).toBe(0);
+    const sumaAportes = ORDEN_METRICAS.reduce((a, n) => a + res.aportes[n], 0);
+    expect(sumaAportes).toBeCloseTo(100, 3);
+  });
+
+  it("permite calcular aportes cuando quedan exactamente MINIMO_METRICAS_VISIBLES (3 metricas)", () => {
+    const metricas = calcularMetricas(POSTURA_PERFECTA, U);
+    // Dejar solo 3 visibles
+    const res = calcularPuntaje(metricas, P, {
+      alineacionColumna: false,
+      rotacionHombros: false,
+      inclinacionLateralCabeza: false,
+    });
+
+    expect(res.puntaje).toBeCloseTo(100, 3);
+    const visibles = ORDEN_METRICAS.filter((n) => res.disponibilidad?.[n]);
+    expect(visibles.length).toBe(3);
+  });
+});
+

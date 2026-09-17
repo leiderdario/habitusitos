@@ -300,6 +300,7 @@ export type CodigoError =
   | "camara-no-encontrada"
   | "camara-ocupada"
   | "camara-desconectada"
+  | "servidor-desconectado"
   | "permiso-denegado"
   | "hardware-lento"
   | "iluminacion-deficiente"

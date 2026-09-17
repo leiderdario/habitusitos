@@ -100,4 +100,17 @@ describe("aplicarPerspectivaAPose", () => {
     expect(res.worldLandmarks?.[0].x).toBeCloseTo(0);
     expect(res.worldLandmarks?.[0].z).toBeCloseTo(1);
   });
+
+  it("proyecta coherentemente los landmarks 2D al rotar la perspectiva (Paso 3)", () => {
+    // Punto con desplazamiento en profundidad z=0.1
+    const pose = {
+      landmarks: [{ x: 0.5, y: 0.5, z: 0.1, visibility: 1 }],
+      worldLandmarks: [{ x: 0, y: 0, z: 0.1, visibility: 1 }],
+    };
+    const res = aplicarPerspectivaAPose(pose, "lado");
+    // Al rotar -90 grados, z=0.1 rota hacia el eje X horizontal en 2D
+    expect(res.landmarks[0].x).not.toBe(0.5);
+    expect(res.landmarks[0].y).toBe(0.5);
+  });
 });
+

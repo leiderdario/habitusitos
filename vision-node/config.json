@@ -1,0 +1,53 @@
+{
+  "camera": {
+    "camera_id": "cam_oficina_01",
+    "name": "Cámara Oficina Principal",
+    "source": 0,
+    "target_fps": 15.0,
+    "min_keypoint_confidence": 0.25
+  },
+  "desks": [
+    {
+      "desk_id": "desk_01",
+      "label": "Escritorio 1 (Izquierdo)",
+      "roi_polygon": [
+        [0.0, 0.0],
+        [0.50, 0.0],
+        [0.50, 1.0],
+        [0.0, 1.0]
+      ],
+      "thresholds": {
+        "trunk_max_angle": 25.0,
+        "neck_max_angle": 30.0,
+        "shoulder_diff_max": 0.07
+      },
+      "employee_name": null,
+      "participating": true
+    },
+    {
+      "desk_id": "desk_02",
+      "label": "Escritorio 2 (Derecho)",
+      "roi_polygon": [
+        [0.50, 0.0],
+        [1.0, 0.0],
+        [1.0, 1.0],
+        [0.50, 1.0]
+      ],
+      "thresholds": {
+        "trunk_max_angle": 25.0,
+        "neck_max_angle": 30.0,
+        "shoulder_diff_max": 0.07
+      },
+      "employee_name": null,
+      "participating": true
+    }
+  ],
+  "hysteresis": {
+    "sustained_seconds": 20.0,
+    "reminder_seconds": 60.0,
+    "unoccupied_seconds_threshold": 5.0
+  },
+  "model_name": "yolo11n-pose.pt",
+  "show_visualizer": true,
+  "events_output_file": "events.jsonl"
+}

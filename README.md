@@ -19,6 +19,13 @@ cd app
 npm install
 npm run dev          # → http://localhost:5173
 ```
+cd "vision-node"
+.\.venv\Scripts\python.exe -m vision_node.main --source 1 --no-gui
+
+Venatana
+cd "vision-node"
+.\.venv\Scripts\python.exe -m vision_node.main --source 1
+
 
 Requiere **Node 20.19+ o 22.12+**. No hace falta nada más.
 

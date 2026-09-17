@@ -28,3 +28,6 @@ desktop.ini
 npm-debug.log*
 .env
 .env.local
+*.jsonl
+events.jsonl
+*.pt

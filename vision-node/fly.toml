@@ -1,0 +1,31 @@
+app = "habitusitos-vision-node"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+
+# 1. Puerto WebSocket para telemetría y postura (WSS público en puerto 8765)
+[[services]]
+  protocol = "tcp"
+  internal_port = 8765
+
+  [[services.ports]]
+    port = 8765
+    handlers = ["tls", "http"]
+
+# 2. Puerto HTTP para streaming de video MJPEG (HTTPS público en puerto 8766)
+[[services]]
+  protocol = "tcp"
+  internal_port = 8766
+
+  [[services.ports]]
+    port = 8766
+    handlers = ["tls", "http"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

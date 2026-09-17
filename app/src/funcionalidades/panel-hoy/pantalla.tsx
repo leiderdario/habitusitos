@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import { Activity, Flame, Timer, TrendingDown, TrendingUp } from "lucide-react";
 import { config } from "@/config/app.config";
-import { useCamara } from "@/camara/use-camara";
+import { useCamara, type FuenteCamara } from "@/camara/use-camara";
 import { obtenerHistorial } from "@/datos/api/historial.api";
 import {
   decliveReciente,
@@ -49,6 +49,10 @@ export function PantallaPanelHoy() {
     modoCamara,
     activarModoCamara,
     empujarLandmarks,
+    personas,
+    estadoConexionVisionNode,
+    camarasOficinaDisponibles,
+    fuenteOficinaActual,
     calibracionPostural,
     disponibilidadMetricas,
     clasificacion,
@@ -68,23 +72,32 @@ export function PantallaPanelHoy() {
   // Puente entre la camara y el motor: la pose real entra por el mismo
   // camino de calculo que las muestras simuladas.
   useEffect(() => {
-    if (modoCamara) empujarLandmarks(camara.pose);
-  }, [camara.pose, modoCamara, empujarLandmarks]);
+    if (modoCamara && camara.fuenteActiva === "webcam") {
+      empujarLandmarks(camara.pose);
+    }
+  }, [camara.pose, camara.fuenteActiva, modoCamara, empujarLandmarks]);
 
   async function cambiarModoCamara(activo: boolean) {
     activarModoCamara(activo);
     if (activo) {
-      await camara.encender();
+      await camara.encender(camara.fuenteActiva);
     } else {
       camara.apagar();
     }
   }
 
-  // Si la camara falla, se vuelve solo a modo simulado. El prototipo nunca se
-  // queda sin datos que ensenar.
+  async function cambiarFuenteCamara(fuente: FuenteCamara) {
+    await camara.encender(fuente);
+  }
+
+  // Si la camara web personal falla, se vuelve a modo simulado para que el
+  // prototipo nunca se quede sin datos. En modo oficina se mantiene activo
+  // para ensenar el diagnostico de conexion al servidor y permitir reintentar.
   useEffect(() => {
-    if (camara.estado === "error" && modoCamara) activarModoCamara(false);
-  }, [camara.estado, modoCamara, activarModoCamara]);
+    if (camara.estado === "error" && modoCamara && camara.fuenteActiva === "webcam") {
+      activarModoCamara(false);
+    }
+  }, [camara.estado, modoCamara, camara.fuenteActiva, activarModoCamara]);
 
   const stats = resumirSesion(muestras, config.UMBRAL_BUENA_POSTURA);
   const declive = decliveReciente(muestras, 900);
@@ -100,6 +113,18 @@ export function PantallaPanelHoy() {
     .filter((_, i) => i % paso === 0)
     .filter((m) => m.detectado)
     .map((m) => ({ t: m.t, score: m.score }));
+
+  // En modo oficina, sincronizamos el medidor principal y el desglose con la persona
+  // detectada por Vision Node (excluyendo la simulacion de fondo "local").
+  const personaOficina = Array.from(personas.values()).find((p) => p.id !== "local");
+  const esModoOficinaActivo = modoCamara && camara.fuenteActiva === "oficina" && Boolean(personaOficina);
+
+  const puntajeMostrado = esModoOficinaActivo ? Math.round(personaOficina!.puntajeSuavizado) : puntajeSuavizado;
+  const presentacionMostrada = esModoOficinaActivo ? personaOficina!.presentacion : presentacion;
+  const clasificacionMostrada = esModoOficinaActivo ? personaOficina!.clasificacion : clasificacion;
+  const metricasMostradas = esModoOficinaActivo ? personaOficina!.metricasAjustadas : metricasAjustadas;
+  const aportesMostrados = esModoOficinaActivo ? personaOficina!.aportes : aportes;
+  const disponibilidadMostrada = esModoOficinaActivo ? personaOficina!.disponibilidadMetricas : disponibilidadMetricas;
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -120,6 +145,10 @@ export function PantallaPanelHoy() {
               <VistaCamara
                 modoCamara={modoCamara}
                 onCambiarModo={cambiarModoCamara}
+                fuenteCamara={camara.fuenteActiva}
+                onCambiarFuenteCamara={cambiarFuenteCamara}
+                personas={personas}
+                estadoConexionVisionNode={estadoConexionVisionNode}
                 estado={camara.estado}
                 error={camara.error}
                 origenRecursos={camara.origenRecursos}
@@ -130,20 +159,26 @@ export function PantallaPanelHoy() {
                 perspectiva={perspectiva}
                 onCambiarPerspectiva={cambiarPerspectiva}
                 calibracionPostural={calibracionPostural}
+                dispositivosVideo={camara.dispositivosVideo}
+                idDispositivoSeleccionado={camara.idDispositivoSeleccionado}
+                onSeleccionarDispositivo={camara.seleccionarDispositivo}
+                camarasOficinaDisponibles={camarasOficinaDisponibles}
+                fuenteOficinaActual={fuenteOficinaActual}
+                onCambiarFuenteOficina={camara.cambiarFuenteOficina}
                 onMarcaPosturaNeutra={() => marcarPosturaNeutra(camara.pose)}
                 onLimpiarCalibracion={() => limpiarCalibracionPostural()}
               />
               <div className="flex flex-col items-center gap-3">
-                <MedidorPostura puntaje={puntajeSuavizado} presentacion={presentacion} />
-                {modoCamara && clasificacion.patronMostrado !== "sin_datos" && (
+                <MedidorPostura puntaje={puntajeMostrado} presentacion={presentacionMostrada} />
+                {modoCamara && clasificacionMostrada.patronMostrado !== "sin_datos" && (
                   <div className="bg-muted/60 flex max-w-[220px] items-center gap-2 rounded-md px-2.5 py-1.5 text-xs">
                     <Activity className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
                     <div className="truncate">
                       <span className="font-medium text-foreground block truncate">
-                        {ETIQUETA_PATRON[clasificacion.patronMostrado]}
+                        {ETIQUETA_PATRON[clasificacionMostrada.patronMostrado]}
                       </span>
                       <span className="text-muted-foreground text-[11px] block truncate">
-                        {DIAGNOSTICO_PATRON[clasificacion.patronMostrado]}
+                        {DIAGNOSTICO_PATRON[clasificacionMostrada.patronMostrado]}
                       </span>
                     </div>
                   </div>
@@ -208,10 +243,10 @@ export function PantallaPanelHoy() {
           </CardHeader>
           <CardContent>
             <DesgloseMetricas
-              metricas={metricasAjustadas}
-              aportes={aportes}
+              metricas={metricasMostradas}
+              aportes={aportesMostrados}
               pesos={ajustes.deteccion.pesos}
-              disponibilidad={disponibilidadMetricas}
+              disponibilidad={disponibilidadMostrada}
             />
           </CardContent>
         </Card>

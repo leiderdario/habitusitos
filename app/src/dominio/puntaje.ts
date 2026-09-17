@@ -61,6 +61,9 @@ export const AYUDA_METRICA: Record<NombreMetrica, string> = {
   inclinacionLateralCabeza: "Si la cabeza esta ladeada hacia un hombro.",
 };
 
+/** Minimo de metricas requeridas con visibilidad suficiente para considerar el puntaje valido (Paso 4). */
+export const MINIMO_METRICAS_VISIBLES = 3;
+
 /** Landmarks requeridos por cada una de las seis metricas para ser confiable. */
 export const PUNTOS_POR_METRICA: Record<NombreMetrica, readonly number[]> = {
   inclinacionCabeza: [PUNTO.NARIZ, PUNTO.OREJA_IZQ, PUNTO.OREJA_DER],
