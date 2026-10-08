@@ -10,37 +10,29 @@
  * Cubre RF-1, RF-2, RF-3 y RF-9 del prompt maestro.
  */
 
-import { useEffect, useState } from "react";
-import { Activity, Flame, Timer, TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect } from "react";
+import { Flame, Timer, TrendingDown, TrendingUp } from "lucide-react";
 import { config } from "@/config/app.config";
-import { useCamara, type FuenteCamara } from "@/camara/use-camara";
-import { obtenerHistorial } from "@/datos/api/historial.api";
-import {
-  decliveReciente,
-  resumirEnPalabras,
-  resumirSesion,
-} from "@/dominio/estadisticas";
-import {
-  DIAGNOSTICO_PATRON,
-  ETIQUETA_PATRON,
-} from "@/dominio/clasificador-posturas";
+import { useCamara } from "@/camara/use-camara";
+import { decliveReciente, resumirSesion } from "@/dominio/estadisticas";
+import { DIAGNOSTICO_PATRON } from "@/dominio/clasificador-posturas";
 import { useSimulacion } from "@/estado/simulacion";
 import { AvisoDemo } from "@/componentes/comunes/avisos";
 import { DesgloseMetricas } from "@/componentes/comunes/desglose-metricas";
 import { SparklineSesion } from "@/componentes/comunes/graficas";
-import { MedidorPostura } from "@/componentes/comunes/medidor-postura";
+import { FormaEstado } from "@/componentes/comunes/forma-estado";
+import { clasesEstado, InsigniaEstado } from "@/componentes/comunes/insignia-estado";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatearDuracion, formatearNumero, formatearPorcentaje } from "@/utils/formato";
-import { VistaCamara } from "./vista-camara";
+import { VistaCamara } from "@/componentes/comunes/vista-camara";
 
-export function PantallaPanelHoy() {
+export function PantallaPanelPersonal() {
   // La sesion la hidrata el marco de la aplicacion (componentes/layout/marco.tsx),
   // no esta pantalla: la franja de bandeja muestra el estado en TODAS las rutas,
   // y si la carga dependiera de abrir el panel, entrar directo a /historial
   // mostraria una sesion en cero.
   const {
     listo,
-    puntajeSuavizado,
     presentacion,
     muestras,
     metricasAjustadas,
@@ -49,10 +41,6 @@ export function PantallaPanelHoy() {
     modoCamara,
     activarModoCamara,
     empujarLandmarks,
-    personas,
-    estadoConexionVisionNode,
-    camarasOficinaDisponibles,
-    fuenteOficinaActual,
     calibracionPostural,
     disponibilidadMetricas,
     clasificacion,
@@ -63,11 +51,6 @@ export function PantallaPanelHoy() {
   } = useSimulacion();
 
   const camara = useCamara(ajustes.camara.muestrasPorSegundo);
-  const [promedioAyer, setPromedioAyer] = useState<number | null>(null);
-
-  useEffect(() => {
-    void obtenerHistorial().then((h) => setPromedioAyer(h.promedioAyer));
-  }, []);
 
   // Puente entre la camara y el motor: la pose real entra por el mismo
   // camino de calculo que las muestras simuladas.
@@ -86,25 +69,16 @@ export function PantallaPanelHoy() {
     }
   }
 
-  async function cambiarFuenteCamara(fuente: FuenteCamara) {
-    await camara.encender(fuente);
-  }
-
-  // Si la camara web personal falla, se vuelve a modo simulado para que el
-  // prototipo nunca se quede sin datos. En modo oficina se mantiene activo
-  // para ensenar el diagnostico de conexion al servidor y permitir reintentar.
+  // Si la camara web falla, se vuelve a modo simulado para que la pantalla
+  // nunca se quede sin datos.
   useEffect(() => {
-    if (camara.estado === "error" && modoCamara && camara.fuenteActiva === "webcam") {
+    if (camara.estado === "error" && modoCamara) {
       activarModoCamara(false);
     }
-  }, [camara.estado, modoCamara, camara.fuenteActiva, activarModoCamara]);
+  }, [camara.estado, modoCamara, activarModoCamara]);
 
   const stats = resumirSesion(muestras, config.UMBRAL_BUENA_POSTURA);
   const declive = decliveReciente(muestras, 900);
-  const frase = resumirEnPalabras(
-    stats,
-    promedioAyer === null ? null : stats.promedio - promedioAyer,
-  );
 
   // Una muestra cada 15 s: suficiente resolucion visual sin renderizar miles de
   // puntos en cada tick del motor.
@@ -114,17 +88,18 @@ export function PantallaPanelHoy() {
     .filter((m) => m.detectado)
     .map((m) => ({ t: m.t, score: m.score }));
 
-  // En modo oficina, sincronizamos el medidor principal y el desglose con la persona
-  // detectada por Vision Node (excluyendo la simulacion de fondo "local").
-  const personaOficina = Array.from(personas.values()).find((p) => p.id !== "local");
-  const esModoOficinaActivo = modoCamara && camara.fuenteActiva === "oficina" && Boolean(personaOficina);
-
-  const puntajeMostrado = esModoOficinaActivo ? Math.round(personaOficina!.puntajeSuavizado) : puntajeSuavizado;
-  const presentacionMostrada = esModoOficinaActivo ? personaOficina!.presentacion : presentacion;
-  const clasificacionMostrada = esModoOficinaActivo ? personaOficina!.clasificacion : clasificacion;
-  const metricasMostradas = esModoOficinaActivo ? personaOficina!.metricasAjustadas : metricasAjustadas;
-  const aportesMostrados = esModoOficinaActivo ? personaOficina!.aportes : aportes;
-  const disponibilidadMostrada = esModoOficinaActivo ? personaOficina!.disponibilidadMetricas : disponibilidadMetricas;
+  // Diagnostico especifico de que corregir, en vez de un numero. Si el
+  // clasificador no tiene una lectura util todavia (sin camara, sin datos
+  // suficientes, o la postura ya es optima), se cae a la descripcion general
+  // del estado -- nunca a un marcador vacio.
+  const hayDiagnosticoEspecifico =
+    modoCamara &&
+    clasificacion.patronMostrado !== "sin_datos" &&
+    clasificacion.patronMostrado !== "postura_desconocida" &&
+    clasificacion.patronMostrado !== "optima";
+  const mensajePrincipal = hayDiagnosticoEspecifico
+    ? DIAGNOSTICO_PATRON[clasificacion.patronMostrado]
+    : presentacion.descripcion;
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
@@ -132,7 +107,7 @@ export function PantallaPanelHoy() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Panel de hoy</h1>
           <p className="text-muted-foreground mt-1 max-w-2xl text-sm text-balance">
-            {listo ? frase : "Preparando tu sesion..."}
+            {listo ? mensajePrincipal : "Preparando tu sesion..."}
           </p>
         </div>
         <AvisoDemo />
@@ -145,10 +120,7 @@ export function PantallaPanelHoy() {
               <VistaCamara
                 modoCamara={modoCamara}
                 onCambiarModo={cambiarModoCamara}
-                fuenteCamara={camara.fuenteActiva}
-                onCambiarFuenteCamara={cambiarFuenteCamara}
-                personas={personas}
-                estadoConexionVisionNode={estadoConexionVisionNode}
+                fuenteCamara="webcam"
                 estado={camara.estado}
                 error={camara.error}
                 origenRecursos={camara.origenRecursos}
@@ -162,34 +134,26 @@ export function PantallaPanelHoy() {
                 dispositivosVideo={camara.dispositivosVideo}
                 idDispositivoSeleccionado={camara.idDispositivoSeleccionado}
                 onSeleccionarDispositivo={camara.seleccionarDispositivo}
-                camarasOficinaDisponibles={camarasOficinaDisponibles}
-                fuenteOficinaActual={fuenteOficinaActual}
-                onCambiarFuenteOficina={camara.cambiarFuenteOficina}
                 onMarcaPosturaNeutra={() => marcarPosturaNeutra(camara.pose)}
                 onLimpiarCalibracion={() => limpiarCalibracionPostural()}
               />
               <div className="flex flex-col items-center gap-3">
-                <MedidorPostura puntaje={puntajeMostrado} presentacion={presentacionMostrada} />
-                {modoCamara && clasificacionMostrada.patronMostrado !== "sin_datos" && (
-                  <div className="bg-muted/60 flex max-w-[220px] items-center gap-2 rounded-md px-2.5 py-1.5 text-xs">
-                    <Activity className="text-muted-foreground size-3.5 shrink-0" aria-hidden />
-                    <div className="truncate">
-                      <span className="font-medium text-foreground block truncate">
-                        {ETIQUETA_PATRON[clasificacionMostrada.patronMostrado]}
-                      </span>
-                      <span className="text-muted-foreground text-[11px] block truncate">
-                        {DIAGNOSTICO_PATRON[clasificacionMostrada.patronMostrado]}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <FormaEstado
+                  forma={presentacion.forma}
+                  tamano={72}
+                  className={clasesEstado(presentacion.tokenColor).texto}
+                />
+                <InsigniaEstado presentacion={presentacion} tamano="lg" />
+                <p className="text-muted-foreground max-w-[220px] text-center text-xs text-balance">
+                  {mensajePrincipal}
+                </p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Puntaje a lo largo de la sesion</CardTitle>
+              <CardTitle>Tendencia de la sesion</CardTitle>
             </CardHeader>
             <CardContent>
               <SparklineSesion
@@ -243,10 +207,10 @@ export function PantallaPanelHoy() {
           </CardHeader>
           <CardContent>
             <DesgloseMetricas
-              metricas={metricasMostradas}
-              aportes={aportesMostrados}
+              metricas={metricasAjustadas}
+              aportes={aportes}
               pesos={ajustes.deteccion.pesos}
-              disponibilidad={disponibilidadMostrada}
+              disponibilidad={disponibilidadMetricas}
             />
           </CardContent>
         </Card>

@@ -8,13 +8,19 @@
 
 ## 1. Qué es esto
 
-Prototipo navegable de **Habitusitos**, aplicación de escritorio Windows que monitorea la postura por webcam. Trabajo de grado, Universidad de Cartagena. Derivado de BatesPosture bajo **AGPL-3.0**.
+**Habitusitos** monitorea la postura por webcam. Trabajo de grado, Universidad de Cartagena. Derivado de BatesPosture bajo **AGPL-3.0**.
 
-**El prototipo no es el producto.** El producto final es Python + PyQt6 + MediaPipe. Antes de tocar nada, leer:
+Dos piezas reales, no un prototipo descartable:
+- **`app/`** — aplicación web (Vite + React) con la lógica de dominio implementada de verdad.
+- **`vision-node/`** — nodo de visión en Python (YOLO-pose) para el modo multi-persona de oficina, con WebSocket hacia `app/`. Corre en local (en el equipo donde se abre la app); la nube del proyecto es solo Vercel (`app/`) y Supabase (cuentas y datos).
 
-1. [PROMPT_MAESTRO_HABITUSITOS.md](PROMPT_MAESTRO_HABITUSITOS.md) — la especificación
-2. [docs/INVESTIGACION_2026.md](docs/INVESTIGACION_2026.md) §1 — **seis contradicciones** entre esa especificación y la realidad de julio de 2026
-3. [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) — las capas y sus reglas
+> El plan original (producto final = Python + PyQt6 + MediaPipe en Windows) **quedó en pausa**: ver [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md) §0. La base de trabajo actual es la web + `vision-node/`. Si alguien reintroduce ese supuesto, es un documento desactualizado, no la dirección vigente.
+
+Antes de tocar nada, leer:
+
+1. [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md) — el plan vigente: multi-persona, panel de oficina, auth, wearable
+2. [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) — las capas de `app/` y sus reglas
+3. [MEMORY.md](MEMORY.md) — qué de ese plan ya está construido y qué falta
 
 ---
 
@@ -84,7 +90,6 @@ Los aportes de tesis viven en **módulos propios y claramente nombrados**, nunca
 ## 5. Honestidad de los datos
 
 - **Todo lo simulado se declara en la propia pantalla.** El aviso de demostración no se cierra ni se atenúa.
-- **Las cifras del benchmark NO pueden citarse en la tesis.** La pantalla lo dice con un aviso permanente. Si alguien pide "quitar el aviso para que se vea mejor", la respuesta es no.
 - **Nunca inventar un dato y presentarlo como medido.** Si un valor es una decisión de diseño y no un resultado, se marca como PENDIENTE con su razón.
 - **`MODO_DATOS=http` lanza un error explícito** en vez de devolver datos simulados en silencio.
 - Si un test está en rojo, se dice. Si un paso se saltó, se dice.
@@ -153,7 +158,7 @@ Más smoke visual de las rutas tocadas si el cambio es de interfaz.
 
 - Quitar el aviso de demostración de ninguna pantalla.
 - Presentar cifras simuladas como medidas.
-- Añadir llamadas de red al software real. El §8.4 promete que no las hay, y es una promesa hacia los 15-70 participantes.
+- Conectar el sistema a cámaras reales monitoreando a compañeros de oficina identificables en un entorno de producción sin tener resuelta la aprobación de ética — ver [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md) §1. (La promesa anterior de "cero llamadas de red" ya no aplica tal cual: `vision-node/` sí habla por WebSocket. Qué promesa de privacidad reemplaza a esa está **pendiente de confirmar**, no de inventar.)
 - Cambiar la licencia o cerrar el código: la AGPL-3.0 es hereditaria.
 - Silenciar un test de arquitectura en vez de arreglar el código.
 - Usar jerga técnica en la interfaz.

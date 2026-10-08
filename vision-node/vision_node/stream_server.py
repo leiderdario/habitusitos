@@ -12,8 +12,11 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Optional, Tuple
+from urllib.parse import parse_qs, urlsplit
 import cv2
 import numpy as np
+
+from vision_node.security import EmisorTickets
 
 logger = logging.getLogger("vision-node.stream")
 
@@ -22,45 +25,63 @@ class VideoStreamHandler(BaseHTTPRequestHandler):
     """Manejador HTTP para transmitir fotogramas MJPEG continuos."""
 
     server: VideoStreamServer
+    timeout = 5.0  # corta conexiones que abren el socket y no terminan de enviar la petición
 
     def do_GET(self) -> None:
-        if self.path in ("/", "/video_feed"):
-            # Configurar TCP_NODELAY y timeout corto para evitar bloqueos del socket
-            try:
-                self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                self.request.settimeout(2.0)
-            except Exception:
-                pass
-
-            try:
-                self.send_response(200)
-                self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
-                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
-                self.send_header("Pragma", "no-cache")
-                self.send_header("Expires", "0")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-            except Exception:
+        partes = urlsplit(self.path)
+        if partes.path in ("/", "/video_feed"):
+            if self.server.tickets is not None:
+                ticket = parse_qs(partes.query).get("t", [None])[0]
+                if self.server.tickets.consumir(ticket) is None:
+                    self.send_error(401, "No autorizado")
+                    return
+            if not self.server.slots.acquire(blocking=False):
+                self.send_error(503, "Demasiadas transmisiones abiertas")
                 return
-
-            last_sent_seq = -1
-
-            while self.server.running:
-                frame_bytes, seq = self.server.wait_for_new_frame(last_sent_seq, timeout=0.2)
-                if frame_bytes is None or seq == last_sent_seq:
-                    continue
-
-                try:
-                    self.wfile.write(b"--frame\r\n")
-                    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
-                    self.wfile.write(frame_bytes)
-                    self.wfile.write(b"\r\n")
-                    last_sent_seq = seq
-                except (BrokenPipeError, ConnectionResetError, socket.timeout, Exception):
-                    # Cliente desconectado o buffer saturado; terminar este hilo de streaming
-                    break
+            try:
+                self._transmitir()
+            finally:
+                self.server.slots.release()
         else:
             self.send_error(404, "Ruta no encontrada")
+
+    def _transmitir(self) -> None:
+        # Configurar TCP_NODELAY y timeout corto para evitar bloqueos del socket
+        try:
+            self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            self.request.settimeout(2.0)
+        except Exception:
+            pass
+
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+            # Sin Access-Control-Allow-Origin: un <img> no lo necesita, y con "*" cualquier
+            # página podría leer el video desde el navegador de quien tenga el ticket.
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+        except Exception:
+            return
+
+        last_sent_seq = -1
+
+        while self.server.running:
+            frame_bytes, seq = self.server.wait_for_new_frame(last_sent_seq, timeout=0.2)
+            if frame_bytes is None or seq == last_sent_seq:
+                continue
+
+            try:
+                self.wfile.write(b"--frame\r\n")
+                self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+                self.wfile.write(frame_bytes)
+                self.wfile.write(b"\r\n")
+                last_sent_seq = seq
+            except (BrokenPipeError, ConnectionResetError, socket.timeout, Exception):
+                # Cliente desconectado o buffer saturado; terminar este hilo de streaming
+                break
 
     def log_message(self, format: str, *args) -> None:
         # Silenciar logs continuos de streaming
@@ -70,9 +91,17 @@ class VideoStreamHandler(BaseHTTPRequestHandler):
 class VideoStreamServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 8766):
+    def __init__(
+        self,
+        host: str = "127.0.0.1",
+        port: int = 8766,
+        tickets: Optional[EmisorTickets] = None,
+        max_transmisiones: int = 8,
+    ):
         self.host = host
         self.port = port
+        self.tickets = tickets
+        self.slots = threading.BoundedSemaphore(max_transmisiones)
         self.running = False
         self.latest_frame_bytes: Optional[bytes] = None
         self.frame_seq: int = 0

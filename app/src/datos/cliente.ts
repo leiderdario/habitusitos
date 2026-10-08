@@ -137,6 +137,36 @@ export const CATALOGO_ERRORES: Record<
     mensaje: "Esta parte existira en el producto final.",
     accion: "Volver",
   },
+  "credenciales-invalidas": {
+    titulo: "Correo o contrasena incorrectos",
+    mensaje: "Revisa que los hayas escrito bien. Por seguridad no decimos cual de los dos fallo.",
+    accion: "Reintentar",
+  },
+  "correo-ya-registrado": {
+    titulo: "Ya existe una cuenta con ese correo",
+    mensaje: "Si es tuya, inicia sesion en vez de registrarte de nuevo.",
+    accion: "Ir a iniciar sesion",
+  },
+  "codigo-organizacion-invalido": {
+    titulo: "Ese codigo de organizacion no es valido",
+    mensaje: "Verifica el codigo con la persona responsable de tu oficina. Puede haber vencido.",
+    accion: "Reintentar",
+  },
+  "sesion-requerida": {
+    titulo: "Tu sesion termino",
+    mensaje: "Por seguridad cerramos la sesion tras un periodo de inactividad.",
+    accion: "Iniciar sesion de nuevo",
+  },
+  "consentimiento-requerido": {
+    titulo: "Falta tu consentimiento",
+    mensaje: "Para guardar datos de salud necesitamos tu consentimiento. Puedes darlo o retirarlo cuando quieras.",
+    accion: "Reintentar",
+  },
+  "acceso-denegado": {
+    titulo: "No tienes acceso a esta vista",
+    mensaje: "La vista de equipo es solo para el rol de responsable de seguridad y salud (RRHH).",
+    accion: "Volver",
+  },
 };
 
 /** Traduce cualquier excepcion a un mensaje presentable. Nunca una traza cruda. */

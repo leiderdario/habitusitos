@@ -9,7 +9,7 @@
  * (Al frente, Al lado, En diagonal).
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { CalibracionPostural, CodigoError, Landmark, Landmark3D, PresentacionEstado } from "@/dominio/tipos";
 import { config } from "@/config/app.config";
 import { CATALOGO_ERRORES } from "@/datos/cliente";
@@ -20,7 +20,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Building2, Camera, CameraOff, Eye, Link2, Loader2, ShieldCheck, Users, Video } from "lucide-react";
+import { Building2, Camera, CameraOff, Eye, Loader2, ShieldCheck, Users, Video } from "lucide-react";
+
+/** URL del video del nodo con su ticket. Sin ticket no hay URL: el `<img>` espera a la autenticacion. */
+function urlVideoOficina(ticket: string | null): string | undefined {
+  if (!ticket) return undefined;
+  const base =
+    (import.meta.env.VITE_VISION_STREAM_URL as string | undefined) || "http://127.0.0.1:8766/video_feed";
+  const url = new URL(base);
+  url.searchParams.set("t", ticket);
+  return url.toString();
+}
 
 /** Conexiones que forman el esqueleto visible. Indices de BlazePose / MediaPipe Pose. */
 const CONEXIONES: readonly [number, number][] = [
@@ -42,6 +52,8 @@ interface Props {
   onCambiarFuenteCamara?(fuente: FuenteCamara): void;
   personas?: Map<string, EstadoPersona>;
   estadoConexionVisionNode?: EstadoConexionVisionNode;
+  /** Ticket de un solo uso para abrir el video del nodo; sin el, el nodo responde 401. */
+  ticketVideoOficina?: string | null;
   estado: EstadoCamara;
   error: CodigoError | null;
   origenRecursos: "local" | "cdn" | "oficina" | null;
@@ -74,6 +86,7 @@ export function VistaCamara({
   onCambiarFuenteCamara,
   personas,
   estadoConexionVisionNode,
+  ticketVideoOficina = null,
   estado,
   error,
   origenRecursos,
@@ -93,8 +106,6 @@ export function VistaCamara({
   onCambiarFuenteOficina,
 }: Props) {
   const lienzoRef = useRef<HTMLCanvasElement | null>(null);
-  const [urlRtspInput, setUrlRtspInput] = useState<string>("");
-  const [mostrarInputRtsp, setMostrarInputRtsp] = useState<boolean>(false);
 
   // Funcion auxiliar para dibujar un esqueleto individual
   const dibujarEsqueletoIndividual = (
@@ -248,9 +259,11 @@ export function VistaCamara({
       for (const p of personas.values()) {
         if (p.id === "local") continue; // Excluir la simulacion local
         if (!p.pose?.landmarks) continue;
+        // Sin etiqueta: ni el id de seguimiento ni el puntaje se dibujan sobre
+        // el video. El panel de oficina ya no muestra puntaje numerico por
+        // persona en ningun lado (ver funcionalidades/panel-oficina/).
         const color = estilo.getPropertyValue(`--${p.presentacion.tokenColor}`).trim();
-        const etiqueta = `${p.id} (${Math.round(p.puntajeSuavizado)} pts)`;
-        dibujarEsqueletoIndividual(ctx, p.pose.landmarks, color, lienzo.width, lienzo.height, etiqueta);
+        dibujarEsqueletoIndividual(ctx, p.pose.landmarks, color, lienzo.width, lienzo.height);
       }
     } else if (landmarks) {
       // Modo personal clasico: un solo esqueleto
@@ -275,10 +288,7 @@ export function VistaCamara({
           />
         ) : (
           <img
-            src={
-              (import.meta.env.VITE_VISION_STREAM_URL as string | undefined) ||
-              "http://127.0.0.1:8766/video_feed"
-            }
+            src={urlVideoOficina(ticketVideoOficina)}
             alt="Video en vivo de camara de oficina"
             className={cn(
               "size-full object-cover",
@@ -500,84 +510,33 @@ export function VistaCamara({
           </div>
         )}
 
-        {/* Selector de fuente para Cámara de oficina y vigilancia IP */}
+        {/* Selector de fuente de oficina. Solo se ofrecen camaras detectadas y fuentes de red
+            que el administrador declaro en el nodo: el cliente no puede escribir una URL. */}
         {modoCamara && fuenteCamara === "oficina" && (
-          <div className="bg-muted/40 border-border/50 flex flex-col gap-2 rounded-lg border p-2.5 text-xs">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-muted-foreground flex items-center gap-1 font-medium">
-                <Building2 className="size-3.5 text-primary" />
-                Fuente de oficina:
-              </span>
-              <select
-                aria-label="Seleccionar fuente de cámara de oficina"
-                value={
-                  typeof fuenteOficinaActual === "string" && fuenteOficinaActual.startsWith("rtsp://")
-                    ? "rtsp"
-                    : String(fuenteOficinaActual)
-                }
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === "rtsp") {
-                    setMostrarInputRtsp(true);
-                  } else {
-                    setMostrarInputRtsp(false);
-                    onCambiarFuenteOficina?.(Number(val));
-                  }
-                }}
-                className="bg-background border-border text-foreground hover:bg-muted/20 focus:ring-primary h-7 rounded-md border px-2 py-0.5 text-xs font-medium shadow-sm transition-colors focus:outline-none focus:ring-1 cursor-pointer"
-              >
-                {camarasOficinaDisponibles.length > 0 ? (
-                  camarasOficinaDisponibles.map((cam) => (
-                    <option key={cam.id} value={String(cam.id)}>
-                      {cam.nombre}
-                    </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="0">Cámara local 0 (Integrada)</option>
-                    <option value="1">Cámara local 1 (USB)</option>
-                  </>
-                )}
-                <option value="rtsp">📹 Cámara IP de vigilancia (RTSP / HTTP)</option>
-              </select>
-
-              <button
-                type="button"
-                onClick={() => setMostrarInputRtsp((prev) => !prev)}
-                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-[11px] underline underline-offset-2 cursor-pointer"
-              >
-                <Link2 className="size-3" />
-                {mostrarInputRtsp ? "Ocultar URL de vigilancia" : "Ingresar URL de vigilancia"}
-              </button>
-            </div>
-
-            {mostrarInputRtsp && (
-              <div className="bg-background/80 border-border/70 flex flex-wrap items-center gap-2 rounded-md border p-2 shadow-xs">
-                <input
-                  type="text"
-                  placeholder="rtsp://admin:pass@192.168.1.50:554/stream1"
-                  value={urlRtspInput}
-                  onChange={(e) => setUrlRtspInput(e.target.value)}
-                  className="border-input placeholder:text-muted-foreground focus:ring-primary h-7 flex-1 min-w-[220px] rounded-md border px-2.5 py-0.5 text-xs font-mono focus:outline-none focus:ring-1"
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-7 px-3 text-xs"
-                  onClick={() => {
-                    if (urlRtspInput.trim()) {
-                      onCambiarFuenteOficina?.(urlRtspInput.trim());
-                    }
-                  }}
-                  disabled={!urlRtspInput.trim()}
-                >
-                  Conectar stream
-                </Button>
-                <span className="text-muted-foreground w-full text-[11px]">
-                  Admite cámaras de vigilancia IP de oficina (RTSP/ONVIF), cámaras IP y streams HTTP/MJPEG.
-                </span>
-              </div>
-            )}
+          <div className="bg-muted/40 border-border/50 flex flex-wrap items-center gap-2 rounded-lg border p-2.5 text-xs">
+            <span className="text-muted-foreground flex items-center gap-1 font-medium">
+              <Building2 className="size-3.5 text-primary" />
+              Fuente de oficina:
+            </span>
+            <select
+              aria-label="Seleccionar fuente de cámara de oficina"
+              value={String(fuenteOficinaActual)}
+              onChange={(e) => {
+                const elegida = camarasOficinaDisponibles.find((cam) => String(cam.id) === e.target.value);
+                if (elegida) onCambiarFuenteOficina?.(elegida.id);
+              }}
+              className="bg-background border-border text-foreground hover:bg-muted/20 focus:ring-primary h-7 rounded-md border px-2 py-0.5 text-xs font-medium shadow-sm transition-colors focus:outline-none focus:ring-1 cursor-pointer"
+            >
+              {camarasOficinaDisponibles.length > 0 ? (
+                camarasOficinaDisponibles.map((cam) => (
+                  <option key={cam.id} value={String(cam.id)}>
+                    {cam.nombre}
+                  </option>
+                ))
+              ) : (
+                <option value={String(fuenteOficinaActual)}>Sin fuentes disponibles</option>
+              )}
+            </select>
           </div>
         )}
 

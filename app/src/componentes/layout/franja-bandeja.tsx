@@ -21,9 +21,6 @@ import { cn } from "@/lib/utils";
 
 export function FranjaBandeja() {
   const presentacion = useSimulacion((s) => s.presentacion);
-  // El icono de bandeja usa el valor suavizado: un numero que parpadea cinco
-  // veces por segundo al lado del reloj seria intolerable en uso real.
-  const puntaje = useSimulacion((s) => s.puntajeSuavizado);
   const corriendo = useSimulacion((s) => s.corriendo);
   const alternar = useSimulacion((s) => s.alternar);
   const t = useSimulacion((s) => s.t);
@@ -45,14 +42,14 @@ export function FranjaBandeja() {
         )}
         // El tooltip textual es el tercer canal en la bandeja, donde no cabe
         // texto visible. Un usuario con daltonismo depende de el.
-        title={`Habitusitos — ${presentacion.etiqueta} (${Math.round(puntaje)}/100)`}
+        title={`Habitusitos — ${presentacion.etiqueta}`}
       >
         <IconoBandeja forma={presentacion.forma} />
-        <span className="tabular text-xs font-medium">{Math.round(puntaje)}</span>
+        <span className="text-xs font-medium">{presentacion.etiqueta}</span>
       </div>
 
       <span className="text-muted-foreground hidden text-xs md:inline">
-        {presentacion.etiqueta} · sesion de {formatearDuracion(t)}
+        sesion de {formatearDuracion(t)}
       </span>
 
       <div className="ml-auto flex items-center gap-1.5">

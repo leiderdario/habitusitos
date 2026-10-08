@@ -232,42 +232,6 @@ export type MotivoRechazo =
   | "estado-de-alerta"
   | "limite-de-deriva";
 
-/** Tabla `benchmark_runs` (seccion 12). */
-export interface CorridaBenchmark {
-  run_id: string;
-  started_at: FechaISO;
-  label: string;
-  config: ConfigBenchmark;
-  resumen: ResumenBenchmark;
-}
-
-export interface ConfigBenchmark {
-  resolucion: "1280x720" | "640x480";
-  muestrasPorSegundo: number;
-  /** 0 = lite, 1 = full, 2 = heavy. Nomenclatura de MediaPipe. */
-  complejidadModelo: 0 | 1 | 2;
-  resolucionAdaptativa: boolean;
-}
-
-/** Tabla `benchmark_samples` (seccion 12). */
-export interface MuestraBenchmark {
-  run_id: string;
-  timestamp: FechaISO;
-  cpu_percent: number;
-  rss_mb: number;
-  effective_fps: number;
-  detection_rate: number;
-}
-
-export interface ResumenBenchmark {
-  cpuPromedio: number;
-  cpuMaximo: number;
-  rssPromedioMb: number;
-  fpsEfectivo: number;
-  tasaDeteccion: number;
-  duracionSegundos: number;
-}
-
 // ---------------------------------------------------------------------------
 // Analitica
 // ---------------------------------------------------------------------------
@@ -278,6 +242,8 @@ export interface DiaHistorial {
   /** Promedio del dia, o null si no hubo uso. */
   promedio: number | null;
   minutosActivos: number;
+  /** Porcentaje del tiempo monitoreado con puntaje bajo el umbral, o null si no hubo uso. */
+  porcentajeMalaPostura: number | null;
   /** Marcado desde la API publica de festivos, con respaldo local. Explica los
    *  huecos del mapa de calor para que no parezcan abandono. */
   esFestivo: boolean;
@@ -290,6 +256,150 @@ export interface ComparacionDiaSemana {
   etiqueta: string;
   promedio: number;
   minutosPromedio: number;
+}
+
+// ---------------------------------------------------------------------------
+// Cuentas y registro — espejo de las tablas reales en Supabase (Postgres)
+// ---------------------------------------------------------------------------
+
+/**
+ * A diferencia de las tablas de la seccion anterior (que espejan un SQLite
+ * HIPOTETICO del producto final), estas espejan columnas de Postgres que YA
+ * EXISTEN desde la Fase 1 — ver supabase/migrations/0001_fase1_cuentas.sql.
+ * Snake_case ingles por la misma razon: son nombres de columna reales.
+ */
+
+/** Como va a usar la aplicacion esta cuenta. No es un flag estetico: gobierna
+ *  que pantallas y layout se montan (ver funcionalidades/panel-personal/ vs
+ *  funcionalidades/panel-oficina/). */
+export type ModoUso = "personal" | "oficina";
+
+export type RolUsuario = "trabajador" | "rrhh_jefe";
+
+/** Perfil de la cuenta. El id coincide con el id de auth.users de Supabase. */
+export interface Usuario {
+  id: string;
+  correo: string | null;
+  nombre: string;
+  modo_uso: ModoUso;
+  rol: RolUsuario;
+  organizacion_id: string | null;
+  creado_en: FechaISO;
+}
+
+export interface Organizacion {
+  id: string;
+  nombre: string;
+  /** Codigo corto para el segundo metodo de login (equipos compartidos de
+   *  oficina). Se rota desde la vista RRHH, nunca se expone en una consulta
+   *  publica sin pasar por la funcion de union (ver migracion SQL). */
+  codigo_acceso: string;
+  creado_en: FechaISO;
+}
+
+export type TipoEventoRegistro =
+  | "login_exitoso"
+  | "login_fallido"
+  | "logout"
+  | "camara_iniciada"
+  | "camara_detenida"
+  | "exportacion"
+  | "cambio_perfil";
+
+/** Fila de `eventos_log`. Nunca se borra ni se edita: es el registro de
+ *  auditoria pedido en el feedback original. */
+export interface EventoRegistro {
+  id?: string;
+  usuario_id: string | null;
+  tipo: TipoEventoRegistro;
+  detalle?: string;
+  creado_en: FechaISO;
+}
+
+// ---------------------------------------------------------------------------
+// Antecedentes de salud — Fase 2. NO diagnostica: solo contextualiza alertas y
+// evita sugerir pausas contraindicadas (ver funcionalidades/antecedentes/).
+// ---------------------------------------------------------------------------
+
+export type ManoDominante = "izquierda" | "derecha" | "ambidiestro";
+
+/** Fila de `antecedentes_salud`, una por usuario (upsert, no historico en si
+ *  misma). El historico de cambios vive aparte, en `CambioAntecedente`. */
+export interface AntecedentesSalud {
+  usuario_id: string;
+
+  // Columna
+  cervicalgia: boolean;
+  lumbalgia: boolean;
+  cifosis_hipercifosis: boolean;
+  lordosis: boolean;
+  hernia_protrusion: boolean;
+  escoliosis: boolean;
+  cirugia_columna_cuello_hombro: boolean;
+
+  // Miembro superior
+  tunel_carpiano: boolean;
+  tendinitis_de_quervain: boolean;
+  epicondilitis: boolean;
+  manguito_rotador: boolean;
+  cirugia_mano_muneca: boolean;
+
+  // Otros
+  usa_ferulas: boolean;
+  /** Dato sensible. RLS restringe esta tabla entera al propio usuario, pero
+   *  este campo en particular nunca debe terminar en ninguna vista agregada
+   *  (Fase 8) ni en ningun export, ni siquiera anonimizado. */
+  embarazo: boolean;
+  dolor_cronico: boolean;
+  enfermedad_laboral_biomecanica_previa: boolean;
+
+  // Habitos
+  horas_sentado_dia: number;
+  mano_dominante: ManoDominante;
+  /** "no_usa" cuando la persona no usa reloj en ninguna muneca -- relevante
+   *  para la Fase 6/7 (el wearable se asocia a una muneca concreta). */
+  muneca_reloj: ManoDominante | "no_usa";
+  ya_hace_pausas: boolean;
+
+  /** null = nunca se ha guardado (todavia no existe la fila). */
+  actualizado_en: FechaISO | null;
+}
+
+/** Valores iniciales de un registro sin antecedentes capturados aun. Todo en
+ *  falso/cero: la ausencia de un dato nunca se trata como una respuesta. */
+export const ANTECEDENTES_VACIOS: Omit<AntecedentesSalud, "usuario_id" | "actualizado_en"> = {
+  cervicalgia: false,
+  lumbalgia: false,
+  cifosis_hipercifosis: false,
+  lordosis: false,
+  hernia_protrusion: false,
+  escoliosis: false,
+  cirugia_columna_cuello_hombro: false,
+  tunel_carpiano: false,
+  tendinitis_de_quervain: false,
+  epicondilitis: false,
+  manguito_rotador: false,
+  cirugia_mano_muneca: false,
+  usa_ferulas: false,
+  embarazo: false,
+  dolor_cronico: false,
+  enfermedad_laboral_biomecanica_previa: false,
+  horas_sentado_dia: 8,
+  mano_dominante: "derecha",
+  muneca_reloj: "no_usa",
+  ya_hace_pausas: false,
+};
+
+/** Fila de `antecedentes_cambios`. Insert-only, igual que `EventoRegistro`:
+ *  el rastro de "que cambio y cuando" pedido en el feedback no se puede
+ *  reconstruir si se permite editar o borrar una fila despues de escrita. */
+export interface CambioAntecedente {
+  id?: string;
+  usuario_id: string;
+  campo: string;
+  valor_anterior: string | null;
+  valor_nuevo: string;
+  cambiado_en: FechaISO;
 }
 
 // ---------------------------------------------------------------------------
@@ -307,7 +417,46 @@ export type CodigoError =
   | "fallo-base-datos"
   | "fallo-exportacion"
   | "sin-deteccion"
-  | "no-implementado";
+  | "no-implementado"
+  | "credenciales-invalidas"
+  | "correo-ya-registrado"
+  | "codigo-organizacion-invalido"
+  | "sesion-requerida"
+  | "consentimiento-requerido"
+  | "acceso-denegado";
+
+// ---------------------------------------------------------------------------
+// Reloj wearable — contrato de datos (Fase 6; ver docs/PROTOCOLO_RELOJ.md)
+// ---------------------------------------------------------------------------
+
+/** Que fuentes respaldan una lectura de postura. `discordantes` = ambas
+ *  responden pero no coinciden: se declara, no se promedia en silencio. */
+export type FuenteDato = "solo_vision" | "solo_imu" | "ambas" | "discordantes";
+
+/** Lectura del reloj. JSON liviano: orientacion y pulso, nunca video ni audio. */
+export interface LecturaReloj {
+  /** Version del protocolo, para que firmware y app evolucionen por separado. */
+  version: 1;
+  /** Milisegundos desde que arranco el reloj (monotonico). El reloj no conoce la
+   *  hora real, y asi no hace falta sincronizar relojes para ordenar lecturas. */
+  t_ms: number;
+  /** Cuaternion de orientacion de la muneca (w, x, y, z), normalizado. */
+  orientacion: { w: number; x: number; y: number; z: number };
+  /** Pulsaciones por minuto, o null si el sensor no tiene lectura valida. */
+  fc_bpm: number | null;
+  /** Porcentaje de bateria 0-100, o null si no se puede medir. */
+  bateria_pct: number | null;
+  /** Si el reloj detecta que esta puesto en la muneca (contacto con la piel). */
+  en_muneca: boolean;
+}
+
+/** Estado de conexion del reloj. Mismo patron que `EstadoConexionVisionNode`. */
+export type EstadoConexionReloj =
+  | { tipo: "inactivo" }
+  | { tipo: "conectando" }
+  | { tipo: "conectado" }
+  | { tipo: "sin_senal"; segundos: number }
+  | { tipo: "desconectado"; motivo?: string };
 
 /**
  * Error de la capa de datos. Existe para que el mock falle como fallaria el

@@ -11,34 +11,54 @@ import { NavLink, Outlet } from "react-router";
 import {
   Activity,
   CalendarRange,
-  Gauge,
+  HeartPulse,
   LifeBuoy,
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
   Sparkles,
+  Users,
 } from "lucide-react";
 import { APP } from "@/config/app.config";
 import { useInterfaz } from "@/estado/interfaz";
 import { useSimulacion } from "@/estado/simulacion";
+import { useSesionUsuario } from "@/estado/sesion-usuario";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FranjaBandeja, NotificacionesEscritorio } from "./franja-bandeja";
 import { SelectorTema } from "./selector-tema";
 
-const NAVEGACION = [
+interface ItemNavegacion {
+  a: string;
+  icono: typeof Activity;
+  texto: string;
+  exacto?: boolean;
+}
+
+const NAVEGACION: ItemNavegacion[] = [
   { a: "/", icono: Activity, texto: "Panel de hoy", exacto: true },
   { a: "/historial", icono: CalendarRange, texto: "Historial" },
-  { a: "/benchmark", icono: Gauge, texto: "Recursos", insignia: "Tesis" },
+  { a: "/antecedentes", icono: HeartPulse, texto: "Antecedentes" },
   { a: "/ajustes", icono: Settings, texto: "Ajustes" },
   { a: "/ayuda", icono: LifeBuoy, texto: "Ayuda y errores" },
 ];
+
+const ITEM_EQUIPO: ItemNavegacion = { a: "/equipo", icono: Users, texto: "Equipo" };
+
+/** "Equipo" solo aparece para el rol RRHH. Es comodidad: la proteccion real esta en la base. */
+function useNavegacion() {
+  const rol = useSesionUsuario((s) => s.usuario?.rol);
+  return rol === "rrhh_jefe"
+    ? [...NAVEGACION.slice(0, 3), ITEM_EQUIPO, ...NAVEGACION.slice(3)]
+    : NAVEGACION;
+}
 
 
 export function Marco() {
   const abierta = useInterfaz((s) => s.barraLateralAbierta);
   const alternar = useInterfaz((s) => s.alternarBarraLateral);
   const cargarSesion = useSimulacion((s) => s.cargar);
+  const navegacion = useNavegacion();
 
   // La sesion se hidrata aqui y no en el panel: la franja de bandeja aparece en
   // todas las rutas, asi que entrar directo a /historial tambien debe mostrar el
@@ -72,7 +92,7 @@ export function Marco() {
         </div>
 
         <nav className="flex-1 space-y-0.5 px-2 py-2" aria-label="Navegacion principal">
-          {NAVEGACION.map(({ a, icono: Icono, texto, exacto, insignia }) => (
+          {navegacion.map(({ a, icono: Icono, texto, exacto }) => (
             <NavLink
               key={a}
               to={a}
@@ -89,16 +109,7 @@ export function Marco() {
               title={abierta ? undefined : texto}
             >
               <Icono className="size-4 shrink-0" aria-hidden />
-              {abierta && (
-                <>
-                  <span className="truncate">{texto}</span>
-                  {insignia && (
-                    <span className="bg-accent/12 text-accent ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium">
-                      {insignia}
-                    </span>
-                  )}
-                </>
-              )}
+              {abierta && <span className="truncate">{texto}</span>}
             </NavLink>
           ))}
         </nav>
@@ -139,12 +150,13 @@ export function Marco() {
 
 /** En pantallas pequenas la navegacion pasa a una fila con desplazamiento. */
 function NavegacionMovil() {
+  const navegacion = useNavegacion();
   return (
     <nav
       className="border-border flex gap-1 overflow-x-auto border-b px-2 py-1.5 md:hidden"
       aria-label="Navegacion principal"
     >
-      {NAVEGACION.map(({ a, icono: Icono, texto, exacto }) => (
+      {navegacion.map(({ a, icono: Icono, texto, exacto }) => (
         <NavLink
           key={a}
           to={a}

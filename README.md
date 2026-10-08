@@ -1,33 +1,47 @@
-# Habitusitos — prototipo navegable
+# Habitusitos
 
-Prototipo visual y semifuncional de **Habitusitos**, una aplicación de escritorio para Windows que usa la webcam para monitorear la postura corporal en segundo plano y solo interviene cuando detecta mala postura sostenida.
+**Habitusitos** usa la webcam para monitorear la postura corporal en segundo plano y solo interviene cuando detecta mala postura sostenida.
 
 Es un trabajo de grado de Ingeniería de Software de la Universidad de Cartagena, derivado de [BatesPosture](https://github.com/wtbates99/batesposture) bajo licencia **AGPL-3.0**.
 
-> ### ⚠️ Esto no es el producto
+> ### Dos piezas reales, no un prototipo descartable
 >
-> Es el prototipo que se enseña **antes** de que exista el software. El producto final es una aplicación de escritorio en **Python + PyQt6 + MediaPipe**.
+> **`app/`** es la aplicación web (Vite + React) con la lógica de dominio implementada de verdad: la fórmula de puntuación de siete métricas, la máquina de estados de alertas, el baseline adaptativo (aporte principal de la tesis) y detección de pose por webcam con `@mediapipe/tasks-vision`.
 >
-> Lo que sí es real aquí: la fórmula de puntuación de siete métricas, la máquina de estados de alertas, el baseline adaptativo (el aporte principal de la tesis) y la detección de pose por webcam. Lo simulado son los datos históricos y las cifras de consumo de recursos — y donde algo es simulado, **la propia pantalla lo declara**.
+> **`vision-node/`** es un nodo de visión en Python (YOLO-pose) para el modo multi-persona de oficina: detecta varias personas por escritorio y transmite por WebSocket hacia `app/`.
+>
+> El plan original (destino final = Python + PyQt6 en Windows) **quedó en pausa** — ver [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md) §0. Lo que sigue simulado (datos históricos, cifras de consumo de recursos) lo declara la propia pantalla.
 
 ---
 
 ## Arrancar
+
+### `app/` — la aplicación web
 
 ```bash
 cd app
 npm install
 npm run dev          # → http://localhost:5173
 ```
-cd "vision-node"
-.\.venv\Scripts\python.exe -m vision_node.main --source 1 --no-gui
-
-Venatana
-cd "vision-node"
-.\.venv\Scripts\python.exe -m vision_node.main --source 1
-
 
 Requiere **Node 20.19+ o 22.12+**. No hace falta nada más.
+
+### `vision-node/` — modo cámara de oficina (opcional, multi-persona)
+
+```bash
+cd vision-node
+python3 -m venv .venv
+.venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch   # instalar torch CPU-only primero
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m vision_node.main --source 0 --no-gui   # segundo plano, sin ventana de depuración
+.venv/bin/python -m vision_node.main --source 0            # con ventana de depuración
+```
+
+En Windows (PowerShell), sustituir `.venv/bin/` por `.venv\Scripts\`.
+
+> Instalar `torch` desde el índice CPU antes de `requirements.txt` evita que `ultralytics` se traiga las ruedas CUDA (varios GB de más) en una máquina sin GPU.
+
+Requiere **Python 3.10+**. Sin `vision-node/` corriendo, `app/` sigue funcionando con la webcam personal del navegador.
 
 ### Opcional: modo cámara sin internet
 
@@ -62,38 +76,38 @@ Genera cuatro PDF y dos CSV en `app/public/documentos/`. Solo necesita **Python 
 
 | Ruta | Qué es |
 |---|---|
-| `/` | **Panel de hoy** — cámara, puntaje, desglose de las siete métricas, sparkline, estadísticas de sesión |
+| `/ingresar` | Login (correo+contraseña, o código de acceso de organización) y registro, con elección de modo de uso |
+| `/bienvenida` | Onboarding: permiso de cámara y calibración inicial |
+| `/` | **Según el modo de la cuenta** (`Usuario.modo_uso`, no un flag visual): `panel-personal/` para cuentas personales — cámara, estado cualitativo (sin puntaje numérico), desglose de métricas, sparkline, estadísticas de sesión; `panel-oficina/` para cuentas de oficina — video protagonista, círculo de promedio del equipo (ventana de 5 min), alerta si más de la mitad está en mala postura. Nunca muestra puntaje individual |
 | `/historial` | Calendario de constancia, comparación por día de la semana, tendencia semanal, exportación |
-| `/baseline` | **Aporte 1 de tesis** — referencia personal adaptativa y sus tres salvaguardas anti-deriva |
-| `/benchmark` | **Aporte 2 de tesis** — comparación de consumo antes/después y metodología |
+| `/antecedentes` | Formulario de antecedentes de salud, editable, con historial de cambios. No diagnostica |
 | `/ajustes` | Seis secciones que espejan las del `SettingsService` real |
 | `/ayuda` | Los nueve escenarios de error, limitaciones conocidas y documentos de la prueba |
-| `/demo` | **Guion de presentación** — seis escenarios con qué decir y qué observar |
-| `/acerca-de` | Licencia AGPL, acceso al código, qué es heredado y qué es aporte propio |
-| `/bienvenida` | Primera ejecución en cinco pasos |
 
-**Empieza por `/demo`.** Trae el recorrido guionado.
+La pantalla de "Recursos" (`/benchmark`, aporte 2 de tesis) se eliminó por completo — ver
+`MEMORY.md` 2026-10-02.
 
 ---
 
 ## Estructura
 
 ```
-MSTR/
-├─ PROMPT_MAESTRO_HABITUSITOS.md   Especificación del trabajo de grado
+habitusitos/
 ├─ README.md · CLAUDE.md · MEMORY.md
 ├─ docs/                            Documentación técnica (ver índice abajo)
 ├─ documentos/generar_documentos.py Generador de los documentos de la prueba
-└─ app/                             El prototipo
+├─ vision-node/                     Nodo de visión Python (YOLO-pose), multi-persona por escritorio
+│  └─ vision_node/                  camera, detector, mapper, state_machine, websocket_server...
+└─ app/                             La aplicación web
    ├─ scripts/preparar-camara.mjs
    ├─ public/                       WASM, modelo y documentos generados (no versionados)
    └─ src/
       ├─ config/        Fuente única de umbrales, límites y semilla
-      ├─ dominio/       Lógica pura, sin imports. CON TESTS. ← lo que se traduce a Python
+      ├─ dominio/       Lógica pura, sin imports. CON TESTS.
       ├─ datos/         El "backend" simulado. La frontera.
       │  ├─ api/        Lo único que las pantallas pueden llamar
       │  └─ fixtures/   Datos de ejemplo, deterministas
-      ├─ camara/        Modo cámara real, aislado
+      ├─ camara/        Modo cámara real (webcam local o `vision-node/` por WebSocket), aislado
       ├─ componentes/   Piezas propias (comunes/, layout/)
       ├─ components/ui/ Primitivas shadcn/ui (terceros)
       ├─ funcionalidades/ Una carpeta por pantalla
@@ -111,45 +125,25 @@ No es una convención de buenas intenciones: está **verificada por test** en `s
 
 | Documento | Para qué |
 |---|---|
-| [docs/INVESTIGACION_2026.md](docs/INVESTIGACION_2026.md) | **Léelo primero.** Investigación verificada el 2026-07-31 y **seis contradicciones** entre el prompt maestro y la realidad de hoy |
-| [docs/DE_MOCK_A_REAL.md](docs/DE_MOCK_A_REAL.md) | **Para quien construya el producto.** Qué se traduce, qué se tira, en qué orden, y las trampas del empaquetado |
-| [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Capas, reglas verificadas, SOLID aplicado, deuda declarada |
-| [docs/MAPA_PROMPT_MAESTRO.md](docs/MAPA_PROMPT_MAESTRO.md) | Cada RF/RNF → pantalla → archivo → estado. Cobertura sin releer 54 KB |
+| [MEMORY.md](MEMORY.md) | **Léelo primero.** Estado vivo: qué está construido, qué falta, decisiones recientes |
+| [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md) | El plan vigente: multi-persona, panel de oficina, auth/multi-tenencia, wearable |
+| [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Capas de `app/`, reglas verificadas, SOLID aplicado, deuda declarada |
+| [docs/plan_implementacion_postura_3d_v2.md](docs/plan_implementacion_postura_3d_v2.md) | Detección 3D de postura (ya implementada) |
 | [docs/SISTEMA_DISENO.md](docs/SISTEMA_DISENO.md) | Tokens, tipografía, accesibilidad WCAG 2.2 AA, voz y copy |
 | [docs/GUIA_DEMO.md](docs/GUIA_DEMO.md) | Guion de 12 minutos + preguntas probables |
 | [docs/DOCUMENTOS_PRUEBA.md](docs/DOCUMENTOS_PRUEBA.md) | Los documentos de la prueba: quién los usa, cuándo y para qué |
 
 ---
 
-## Cuatro cosas que hay que saber antes de tocar el producto real
+## Qué falta para el plan multi-persona de oficina
 
-Verificadas el 31 de julio de 2026. Detalle completo en [docs/INVESTIGACION_2026.md](docs/INVESTIGACION_2026.md).
+El plan vigente está en [docs/prompt_maestro_multipersona_oficina.md](docs/prompt_maestro_multipersona_oficina.md); el detalle de qué ya está hecho y qué no, en la sección "Pendiente" de [MEMORY.md](MEMORY.md). Resumen:
 
-1. **`mediapipe.solutions` fue eliminado de los wheels de Python ≥ 0.10.31.** El pin `0.10.21` del proyecto original es un techo permanente. Migrar a `mediapipe.tasks.python.vision.PoseLandmarker` es obligatorio, no opcional.
-2. **El repositorio base fue renombrado y su historial borrado el 2026-07-28.** Conserva 3 commits y cero releases. Cualquier análisis anterior a esa fecha describe un árbol que ya no existe.
-3. **No existe hook de PyInstaller para MediaPipe** (verificado sobre los 682 hooks disponibles). El `.spec` se escribe a mano. Es el mayor riesgo del empaquetado.
-4. **`winotify` está muerto** desde febrero de 2022. Usar `windows-toasts` y registrar un AUMID, o los avisos salen como "Python".
+- **Hecho:** `vision-node/` detecta y rastrea varias personas por escritorio (YOLO-pose) y transmite por WebSocket; `app/` ya muestra el estado de esa conexión y degrada con gracia si falta una métrica.
+- **Falta en el frontend:** tipos multi-persona en `dominio/` (`FrameMultiPersona`, `idSeguimiento`), el panel de oficina agregado y anónimo, autenticación/multi-tenencia por organización.
+- **Pendiente de decidir, no de código:** qué promesa de privacidad y red reemplaza a la original ("cero llamadas de red"), ahora que `vision-node/` sí las hace — ver [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) §8.
 
-Además, la calibración de 6 segundos del proyecto original **guarda datos que el motor de puntaje no usa**. No es un detalle: refuerza la justificación del aporte 1.
-
----
-
-## Cómo pasar de prototipo a producto real
-
-Resumen. El detalle está en [docs/DE_MOCK_A_REAL.md](docs/DE_MOCK_A_REAL.md).
-
-| Del prototipo | Destino |
-|---|---|
-| `dominio/puntaje.ts` | → `ml/pose_detector.py` (ya existe, verificar) |
-| `dominio/baseline-adaptativo.ts` | → **`services/adaptive_baseline_service.py`** (módulo nuevo) |
-| `dominio/maquina-estado.ts` | → `services/notification_service.py` |
-| `dominio/estadisticas.ts` | → `services/score_service.py` (ya existe) |
-| `dominio/tipos.ts` | → esquema SQLite |
-| `datos/api/*.ts` | → consultas a SQLite. Cada función lleva su consulta en la cabecera |
-| `funcionalidades/*/pantalla.tsx` | → widgets PyQt6. Se reutiliza el diseño y el copy, no el código |
-| `datos/fixtures/`, `almacen.ts`, `estado/` | Se tiran |
-
-**`dominio/` no importa nada** — ni React, ni la configuración, ni el store. Está escrita así a propósito: es la parte de este repositorio que se traduce línea por línea, y sus tests son el contrato de que la traducción es correcta.
+**`dominio/` no importa nada** — ni React, ni la configuración, ni el store. Está escrita así a propósito: es lógica pura, fácil de probar y de llevar a cualquier otro lugar si hiciera falta, y sus tests son el contrato de que se comporta como dice.
 
 ---
 

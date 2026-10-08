@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
-from pydantic import BaseModel, Field
+from typing import Dict, List, Optional, Tuple, Union
+from pydantic import BaseModel, Field, field_validator
 
 
 class CameraConfig(BaseModel):
@@ -15,6 +15,18 @@ class CameraConfig(BaseModel):
     source: Union[int, str] = Field(default=0, description="Índice de webcam, ruta de video o URL RTSP")
     target_fps: float = Field(default=3.0, ge=1.0, le=30.0, description="Tasa de muestreo objetivo (2-5 FPS recomendado)")
     min_keypoint_confidence: float = Field(default=0.35, ge=0.0, le=1.0, description="Umbral mínimo de visibilidad/confianza de keypoints")
+    named_sources: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Alias -> fuente (rtsp://, ruta de video). El cliente elige un alias, nunca una fuente libre, y la URL (con credenciales) no sale del servidor. Los alias no pueden ser números.",
+    )
+
+    @field_validator("named_sources")
+    @classmethod
+    def _alias_no_numericos(cls, v: Dict[str, str]) -> Dict[str, str]:
+        for alias in v:
+            if alias.isdigit():
+                raise ValueError(f"El alias '{alias}' no puede ser un número: se confundiría con un índice de webcam.")
+        return v
 
 
 class DeskThresholds(BaseModel):

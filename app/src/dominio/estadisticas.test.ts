@@ -4,7 +4,6 @@ import {
   decliveReciente,
   promedioMovil,
   promedioPorDiaSemana,
-  resumirEnPalabras,
   resumirSesion,
   tendenciaPorSemana,
 } from "./estadisticas";
@@ -112,6 +111,7 @@ const dia = (fecha: string, promedio: number | null, minutos = 120): DiaHistoria
   fecha,
   promedio,
   minutosActivos: minutos,
+  porcentajeMalaPostura: promedio === null ? null : 10,
   esFestivo: false,
 });
 
@@ -147,26 +147,5 @@ describe("tendenciaPorSemana", () => {
     expect(r[0].semana).toBe("2026-07-27");
     expect(r[0].promedio).toBe(80);
     expect(r[1].semana).toBe("2026-08-03");
-  });
-});
-
-describe("resumirEnPalabras", () => {
-  it("dice que no hay datos en vez de mostrar ceros", () => {
-    const texto = resumirEnPalabras(resumirSesion([], 65), null);
-    expect(texto).toContain("Todavia no hay datos");
-  });
-
-  it("traduce las cifras a una frase en espanol, sin jerga tecnica", () => {
-    const texto = resumirEnPalabras(resumirSesion(serie([90, 90, 90, 90]), 65), 6);
-    expect(texto).toMatch(/buena postura/);
-    expect(texto).toMatch(/mejor que ayer/);
-    for (const jerga of ["landmark", "EMA", "CLAHE", "score", "baseline"]) {
-      expect(texto.toLowerCase()).not.toContain(jerga.toLowerCase());
-    }
-  });
-
-  it("no exagera diferencias despreciables con ayer", () => {
-    const texto = resumirEnPalabras(resumirSesion(serie([90, 90, 90]), 65), 1);
-    expect(texto).toContain("parecido a ayer");
   });
 });

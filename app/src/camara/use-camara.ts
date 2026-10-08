@@ -12,8 +12,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CodigoError, FramePose } from "@/dominio/tipos";
 import { useSimulacion } from "@/estado/simulacion";
+import { useSesionUsuario } from "@/estado/sesion-usuario";
+import { registrarEvento } from "@/datos/api/registro.api";
+import { obtenerTokenSesion } from "@/datos/api/auth.api";
+import { vaciarHistorialPendiente } from "@/datos/api/historial.api";
 import type { Detector } from "./detector-pose";
 import { crearDetector } from "./detector-pose";
+
+/** Fire-and-forget: el log de auditoria nunca debe bloquear ni romper el
+ *  encendido/apagado real de la camara (contrato de este hook, ver cabecera). */
+function registrarEventoCamara(tipo: "camara_iniciada" | "camara_detenida") {
+  void registrarEvento({ usuario_id: useSesionUsuario.getState().usuario?.id ?? null, tipo });
+}
 
 export type EstadoCamara =
   | "inactiva"
@@ -76,6 +86,9 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
   const temporizadorRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const heartbeatRef = useRef<number | null>(null);
+  /** Se incrementa en cada `apagar()`: un encendido en vuelo que vea otro valor sabe que
+   *  lo cancelaron y descarta lo que haya creado (el modelo tarda lo bastante para que ocurra). */
+  const tokenEncendidoRef = useRef(0);
 
   const actualizarListaDispositivos = useCallback(async () => {
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.enumerateDevices) return;
@@ -111,6 +124,11 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
   }, [actualizarListaDispositivos]);
 
   const apagar = useCallback(() => {
+    tokenEncendidoRef.current += 1;
+    // Refs, no el estado de React: esta funcion tiene deps [] y el estado
+    // cerrado seria el del primer render. Los refs siempre reflejan el valor
+    // actual, y es justo la senal de "de verdad habia algo encendido".
+    const estabaEncendida = flujoRef.current !== null || wsRef.current !== null;
     if (temporizadorRef.current !== null) {
       clearInterval(temporizadorRef.current);
       temporizadorRef.current = null;
@@ -124,6 +142,7 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
       wsRef.current = null;
     }
     useSimulacion.getState().actualizarConexionVisionNode({ tipo: "inactivo" });
+    useSimulacion.getState().fijarTicketVideoOficina(null);
     flujoRef.current?.getTracks().forEach((pista) => pista.stop());
     flujoRef.current = null;
     detectorRef.current?.cerrar();
@@ -132,6 +151,10 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
     setPose(null);
     setEstado("inactiva");
     setError(null);
+    if (estabaEncendida) {
+      registrarEventoCamara("camara_detenida");
+      void vaciarHistorialPendiente();
+    }
   }, []);
 
   const encender = useCallback(
@@ -166,12 +189,22 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
           const ws = new WebSocket(wsUrl);
           wsRef.current = ws;
 
+          // El nodo no habla con nadie hasta recibir este mensaje con el token de Supabase.
           ws.onopen = () => {
-            setEstado("activa");
-            useSimulacion.getState().actualizarConexionVisionNode({ tipo: "conectado_sin_personas" });
-            reiniciarHeartbeat();
-            // Solicitar fuentes al conectar
-            ws.send(JSON.stringify({ accion: "listar_camaras" }));
+            void obtenerTokenSesion().then((tokenSesion) => {
+              if (wsRef.current !== ws) return;
+              if (!tokenSesion) {
+                ws.close();
+                useSimulacion.getState().actualizarConexionVisionNode({
+                  tipo: "desconectado",
+                  motivo: "Inicia sesion para conectarte al nodo de oficina",
+                });
+                setError("servidor-desconectado");
+                setEstado("error");
+                return;
+              }
+              ws.send(JSON.stringify({ accion: "autenticar", token: tokenSesion }));
+            });
           };
 
           ws.onmessage = (event) => {
@@ -179,10 +212,23 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
             try {
               const data = JSON.parse(event.data);
 
+              if (data.tipo === "autenticado") {
+                useSimulacion
+                  .getState()
+                  .fijarTicketVideoOficina(typeof data.ticket_video === "string" ? data.ticket_video : null);
+                setEstado("activa");
+                registrarEventoCamara("camara_iniciada");
+                useSimulacion.getState().actualizarConexionVisionNode({ tipo: "conectado_sin_personas" });
+                ws.send(JSON.stringify({ accion: "listar_camaras" }));
+              }
+
               if (data.tipo === "info_fuentes") {
                 useSimulacion.getState().actualizarFuentesOficina(
                   data.fuente_actual,
-                  Array.isArray(data.camaras_locales) ? data.camaras_locales : [],
+                  [
+                    ...(Array.isArray(data.camaras_locales) ? data.camaras_locales : []),
+                    ...(Array.isArray(data.fuentes_configuradas) ? data.fuentes_configuradas : []),
+                  ],
                 );
               }
 
@@ -231,14 +277,25 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
             setEstado("error");
           };
 
-          ws.onclose = () => {
+          ws.onclose = (evento) => {
             if (heartbeatRef.current !== null) {
               clearTimeout(heartbeatRef.current);
               heartbeatRef.current = null;
             }
             if (wsRef.current === ws) {
-              useSimulacion.getState().actualizarConexionVisionNode({ tipo: "desconectado" });
-              setEstado("inactiva");
+              useSimulacion.getState().fijarTicketVideoOficina(null);
+              // 4401 = el nodo rechazo el token o la cuenta no es de su organizacion.
+              const noAutorizado = evento.code === 4401;
+              useSimulacion.getState().actualizarConexionVisionNode({
+                tipo: "desconectado",
+                motivo: noAutorizado ? "Tu cuenta no tiene acceso a este nodo de oficina" : undefined,
+              });
+              if (noAutorizado) {
+                setError("servidor-desconectado");
+                setEstado("error");
+              } else {
+                setEstado("inactiva");
+              }
             }
           };
         } catch (e) {
@@ -257,13 +314,13 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
       // Modo personal webcam (MediaPipe local)
       setFuenteActiva("webcam");
       useSimulacion.getState().actualizarConexionVisionNode({ tipo: "inactivo" });
+      const token = tokenEncendidoRef.current;
       try {
-        setEstado("cargando-modelo");
-        const detector = await crearDetector();
-        detectorRef.current = detector;
-        setOrigenRecursos(detector.origen);
-
+        performance.mark("camara:inicio");
         setEstado("pidiendo-permiso");
+        // El modelo (~17 MB) y el permiso de camara son independientes: se piden a la vez
+        // para que el tiempo total sea el del mas lento y no la suma. El permiso va
+        // primero en la cola de eventos porque es el que espera una persona.
         const videoConstraints: MediaTrackConstraints = {
           width: { ideal: 640 },
           height: { ideal: 480 },
@@ -271,19 +328,43 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
         if (deviceIdActivo) {
           videoConstraints.deviceId = { exact: deviceIdActivo };
         }
-
-        const flujo = await navigator.mediaDevices.getUserMedia({
+        const promesaFlujo = navigator.mediaDevices.getUserMedia({
           video: videoConstraints,
           audio: false,
         });
+        const promesaDetector = crearDetector();
+        // Si una de las dos falla, la otra puede quedar sin esperar: sin esto, su
+        // rechazo posterior seria un "unhandled rejection" y el flujo quedaria encendido.
+        promesaFlujo.then(
+          (f) => {
+            if (token !== tokenEncendidoRef.current) f.getTracks().forEach((p) => p.stop());
+          },
+          () => {},
+        );
+        promesaDetector.then(
+          (d) => {
+            if (token !== tokenEncendidoRef.current) d.cerrar();
+          },
+          () => {},
+        );
+
+        const flujo = await promesaFlujo;
+        performance.mark("camara:permiso-concedido");
+        if (token !== tokenEncendidoRef.current) return;
         flujoRef.current = flujo;
-        // Re-escanear para actualizar etiquetas descriptivas otorgado el permiso
-        void actualizarListaDispositivos();
 
         const video = videoRef.current;
         if (!video) throw new Error("El elemento de video no esta montado");
-
         video.srcObject = flujo;
+
+        setEstado("cargando-modelo");
+        const detector = await promesaDetector;
+        performance.mark("camara:modelo-listo");
+        if (token !== tokenEncendidoRef.current) return;
+        detectorRef.current = detector;
+        setOrigenRecursos(detector.origen);
+        // Re-escanear para actualizar etiquetas descriptivas otorgado el permiso
+        void actualizarListaDispositivos();
 
         await new Promise<void>((resolve) => {
           if (video.readyState >= 2) {
@@ -306,7 +387,9 @@ export function useCamara(muestrasPorSegundo: number): useCamara {
           apagar();
         });
 
+        performance.mark("camara:primer-frame-listo");
         setEstado("activa");
+        registrarEventoCamara("camara_iniciada");
 
         const intervalo = Math.round(1000 / Math.max(1, muestrasPorSegundo));
         temporizadorRef.current = window.setInterval(() => {

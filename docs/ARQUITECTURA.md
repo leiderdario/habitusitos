@@ -3,27 +3,16 @@
 | Campo | Detalle |
 |---|---|
 | Documento | Decisiones de arquitectura y reglas de organización |
-| Ámbito | El prototipo navegable (`app/`). Para el producto final ver [DE_MOCK_A_REAL.md](DE_MOCK_A_REAL.md) |
-| Estado | Vigente. Las reglas se verifican automáticamente en `app/src/arquitectura.test.ts` |
+| Ámbito | La aplicación web (`app/`) y su frontera con el nodo de visión (`vision-node/`) |
+| Estado | Vigente para `app/`. Las reglas de capas se verifican automáticamente en `app/src/arquitectura.test.ts` |
 
 ---
 
 ## 1. Qué es y qué no es este código
 
-**Es** un prototipo navegable con todas las pantallas del producto, con la lógica de dominio implementada de verdad y el resto simulado de forma determinista.
+**Es** la aplicación web real: lógica de dominio implementada de verdad (puntaje, máquina de estados, baseline adaptativo), con dos fuentes de pose intercambiables — cámara local vía MediaPipe en el navegador, o el flujo multi-persona de `vision-node/` (YOLO-pose en Python) por WebSocket.
 
-**No es** el producto. El producto final es una aplicación de escritorio Windows en Python + PyQt6 + MediaPipe.
-
-Esa distinción gobierna todas las decisiones que siguen. La pregunta que se hizo en cada una fue: **¿esto se tira cuando llegue el software real, o se traduce?**
-
-| Capa | Destino |
-|---|---|
-| `dominio/` | **Se traduce**, línea por línea, a Python |
-| `datos/api/` | **Se traduce**: cada función pasa a ser una consulta a SQLite |
-| `datos/fixtures/`, `datos/almacen.ts` | **Se tira** |
-| `camara/` | **Se traduce** conceptualmente (Tasks API en Python) |
-| `componentes/`, `funcionalidades/` | **Se traduce** a widgets de PyQt6, no se reutiliza |
-| `estado/` | **Se tira** (PyQt6 tiene su propio modelo de estado) |
+> ⚠️ **Esta sección reemplaza una versión anterior que describía el destino final como una aplicación de escritorio Windows en Python + PyQt6.** Ese plan quedó en pausa: `docs/prompt_maestro_multipersona_oficina.md` §0 confirma que la base de trabajo es esta aplicación web. La tabla "qué se traduce a Python" que vivía aquí ya no aplica y se retiró para no inducir a error — no se reescribió por otra porque el destino real (web + `vision-node/` multi-persona, con auth y multi-tenencia) todavía se está construyendo; ver ese documento para las fases pendientes.
 
 ---
 
@@ -121,7 +110,7 @@ Todo lo demás —conceptos, funciones, variables— va en español.
 
 ### 4.2 Trazabilidad de autoría
 
-Cada archivo declara en su cabecera si es heredado de BatesPosture o aporte propio, y por qué está donde está. No es documentación decorativa: el §0.3 del prompt maestro lo exige porque el autor debe defender el código ante un jurado.
+Cada archivo declara en su cabecera si es heredado de BatesPosture o aporte propio, y por qué está donde está. No es documentación decorativa: el autor debe defender el código ante un jurado (trabajo de grado, ver [CLAUDE.md](../CLAUDE.md) §4).
 
 ---
 
@@ -197,7 +186,7 @@ Los recursos de MediaPipe (≈50 MB entre WASM y modelo) **no se versionan**. Se
 
 Con **tabla de respaldo local**, que no es un adorno: durante esta investigación se comprobó que `api.quotable.io` —una API que llevaba años funcionando— está muerta. El día de la sustentación no puede depender de que un servicio gratuito siga arriba.
 
-> ⚠️ **Esto es exclusivo del prototipo.** El software real **no hace ninguna llamada de red**. Es una promesa de producto del §8.4 hacia los 15–70 participantes, no una preferencia técnica.
+> ⚠️ **Esta sección también describía una promesa de "cero llamadas de red" para el software real.** Ya no es cierto tal cual: el modo "Cámara de oficina" habla con `vision-node/` por WebSocket, y ese nodo corre en local, en el equipo donde se abre la app (ver `docs/SEGURIDAD_VISION_NODE.md`). Falta decidir y documentar de nuevo, con el asesor de ética si aplica, qué promesa de privacidad/red sigue vigente hacia los participantes — no asumir ninguna de las dos versiones sin confirmarlo.
 
 ---
 

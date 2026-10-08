@@ -51,6 +51,7 @@ import {
 import { PUNTO } from "@/dominio/tipos";
 import type {
   CalibracionPostural,
+  EstadoPostural,
   FilaBaseline,
   FramePose,
   Landmark,
@@ -68,6 +69,7 @@ import type { Ajustes } from "@/datos/fixtures/ajustes";
 import { AJUSTES_POR_DEFECTO } from "@/datos/fixtures/ajustes";
 import { CALIBRACION_INICIAL } from "@/datos/fixtures/sesion";
 import { obtenerSesionInicial } from "@/datos/api/sesion.api";
+import { acumularMuestraHistorial } from "@/datos/api/historial.api";
 import {
   obtenerEstadoBaseline,
   obtenerHistorialBaseline,
@@ -148,9 +150,23 @@ interface EstadoSimulacion {
   /** Mapa de personas evaluadas simultaneamente (Paso 1 mejora.md: "local" o track_id). */
   personas: Map<string, EstadoPersona>;
 
+  /**
+   * Ventana deslizante de los ultimos `VENTANA_AGREGADO_OFICINA_SEGUNDOS` para
+   * el panel de oficina (ver dominio/agregacion-oficina.ts). Usa reloj de
+   * pared (`Date.now()`), no el `t` monotonico de la sesion: `t` solo avanza
+   * via `procesarMuestra` (modo personal/simulado) y se queda congelado
+   * mientras el modo oficina esta activo, asi que no sirve para medir una
+   * ventana real de minutos en ese modo.
+   */
+  historialAgregadoOficina: Array<{ t: number; estado: EstadoPostural; puntaje: number }>;
+
   /** Estado de conexion con el servidor Vision Node (Paso 1 mejora.md feedback). */
   estadoConexionVisionNode: EstadoConexionVisionNode;
   actualizarConexionVisionNode(estado: EstadoConexionVisionNode): void;
+
+  /** Ticket de un solo uso para abrir el video del vision-node (lo entrega el WebSocket autenticado). */
+  ticketVideoOficina: string | null;
+  fijarTicketVideoOficina(ticket: string | null): void;
 
   /** Fuentes de cámara detectadas en el servidor de oficina. */
   camarasOficinaDisponibles: CamaraOficinaLocal[];
@@ -291,9 +307,14 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
   historialBaseline: [],
   notificaciones: [],
   personas: new Map<string, EstadoPersona>(),
+  historialAgregadoOficina: [],
   estadoConexionVisionNode: { tipo: "inactivo" },
   actualizarConexionVisionNode(estado) {
     set({ estadoConexionVisionNode: estado });
+  },
+  ticketVideoOficina: null,
+  fijarTicketVideoOficina(ticket) {
+    set({ ticketVideoOficina: ticket });
   },
   camarasOficinaDisponibles: [],
   fuenteOficinaActual: 0,
@@ -570,7 +591,18 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
       });
     }
 
-    set({ personas: pers });
+    // Ventana deslizante para el panel de oficina (semaforo de jornada, no de
+    // frame). Reloj de pared a proposito -- ver el comentario del campo.
+    const ahoraMs = Date.now();
+    const corteMs = ahoraMs - config.VENTANA_AGREGADO_OFICINA_SEGUNDOS * 1000;
+    const nuevasEntradas = Array.from(pers.values())
+      .filter((p) => p.id !== "local")
+      .map((p) => ({ t: ahoraMs, estado: p.maquina.estado, puntaje: p.puntajeSuavizado }));
+    const historialAgregadoOficina = [...s.historialAgregadoOficina, ...nuevasEntradas].filter(
+      (entrada) => entrada.t > corteMs,
+    );
+
+    set({ personas: pers, historialAgregadoOficina });
   },
 
 
@@ -636,6 +668,7 @@ export const useSimulacion = create<EstadoSimulacion>((set, get) => ({
       escenarioActivo: null,
       calibracionPostural: { offsetZ: 0, vectorArriba: null },
       clasificacion: ESTADO_CLASIFICACION_INICIAL,
+      historialAgregadoOficina: [],
     });
     get().iniciar();
   },
@@ -672,6 +705,10 @@ function procesarMuestra(
   const resultadoVista = calcularPuntaje(metricasVista, s.ajustes.deteccion.pesos, disponibilidad);
 
   const transicion = avanzar(s.maquina, resultadoVista.puntaje, t, cfgAlertas);
+
+  // `pose` solo llega con una persona real frente a la camara: el bucle simulado no
+  // pasa pose, y nunca debe alimentar el historial real.
+  if (pose) acumularMuestraHistorial(dt, resultado.puntaje);
 
   const actualizacion = cfgBaseline.activo
     ? actualizarBaseline(

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -34,6 +35,14 @@ from vision_node.mapper import coco_to_blazepose_landmarks
 from vision_node.spatial_mapping import match_people_to_desks, PersonDetection
 from vision_node.state_machine import DeskStateMachine, DeskStatus, EventType
 from vision_node.visualizer import draw_debug_overlay
+from vision_node.security import (
+    AjustesSeguridad,
+    EmisorTickets,
+    ErrorConfiguracionSeguridad,
+    VerificadorSupabase,
+    fuente_permitida,
+    nombre_publico_de_fuente,
+)
 from vision_node.websocket_server import VisionWebSocketServer
 from vision_node.stream_server import VideoStreamServer
 
@@ -45,9 +54,21 @@ logger = logging.getLogger("vision-node")
 
 
 class VisionNodeApp:
-    def __init__(self, config: VisionNodeConfig, ws_port: int = 8765):
+    def __init__(self, config: VisionNodeConfig, ws_port: int = 8765, seguridad: Optional[AjustesSeguridad] = None):
         self.config = config
-        self.stream_server = VideoStreamServer(host="127.0.0.1", port=ws_port + 1)
+        self.seguridad = seguridad or AjustesSeguridad.desde_entorno({})
+        verificador: Optional[VerificadorSupabase] = None
+        tickets: Optional[EmisorTickets] = None
+        if self.seguridad.exigir_autenticacion:
+            verificador = VerificadorSupabase(
+                self.seguridad.supabase_url,
+                self.seguridad.supabase_clave,
+                self.seguridad.organizacion_id,
+            )
+            tickets = EmisorTickets()
+        else:
+            logger.warning("AUTENTICACIÓN APAGADA: solo para desarrollo local en 127.0.0.1.")
+        self.stream_server = VideoStreamServer(host=self.seguridad.host, port=ws_port + 1, tickets=tickets)
         self.camera = CameraCapture(
             source=config.camera.source,
             target_fps=config.camera.target_fps,
@@ -62,10 +83,13 @@ class VisionNodeApp:
             echo_console=True,
         )
         self.ws_server = VisionWebSocketServer(
-            host="127.0.0.1",
+            host=self.seguridad.host,
             port=ws_port,
             action_callback=self._handle_client_action,
             connect_callback=self._handle_client_connect,
+            verificador=verificador,
+            tickets=tickets,
+            origenes=self.seguridad.origenes,
         )
 
         # Máquinas de estado por escritorio
@@ -78,15 +102,26 @@ class VisionNodeApp:
         # Caché de escritorios por ID para acceso O(1)
         self.desks_map: Dict[str, DeskZone] = {d.desk_id: d for d in config.desks}
 
+        self._cache_camaras: Optional[tuple] = None
         self.running = False
         self.frame_count = 0
         self.fps_actual = 0.0
 
+    def _camaras_locales(self) -> List[Dict[str, Any]]:
+        """Escaneo con caché: abrir las cámaras es lento y cualquier cliente puede pedirlo."""
+        ahora = time.monotonic()
+        if self._cache_camaras is None or ahora - self._cache_camaras[0] > 30.0:
+            self._cache_camaras = (ahora, scan_available_cameras())
+        return self._cache_camaras[1]
+
     def _build_info_fuentes_payload(self) -> Dict[str, Any]:
         return {
             "tipo": "info_fuentes",
-            "fuente_actual": self.config.camera.source,
-            "camaras_locales": scan_available_cameras(),
+            "fuente_actual": nombre_publico_de_fuente(self.config.camera.source, self.config.camera.named_sources),
+            "camaras_locales": self._camaras_locales(),
+            "fuentes_configuradas": [
+                {"id": alias, "nombre": alias, "tipo": "red"} for alias in self.config.camera.named_sources
+            ],
             "soporta_rtsp": True,
         }
 
@@ -99,14 +134,21 @@ class VisionNodeApp:
         if accion == "listar_camaras":
             self.ws_server.send_to_client(websocket, self._build_info_fuentes_payload())
         elif accion == "cambiar_fuente":
-            nueva_fuente = action_data.get("fuente")
-            if nueva_fuente is not None:
-                if isinstance(nueva_fuente, str) and nueva_fuente.isdigit():
-                    nueva_fuente = int(nueva_fuente)
-                ok = self.change_source(nueva_fuente)
+            nueva_fuente = fuente_permitida(
+                action_data.get("fuente"),
+                self.config.camera.named_sources,
+                (c["id"] for c in self._camaras_locales()),
+            )
+            if nueva_fuente is None:
+                logger.warning("Cambio de fuente rechazado: no está en la lista permitida.")
                 payload = self._build_info_fuentes_payload()
-                payload["cambio_exitoso"] = ok
-                self.ws_server.broadcast_message(payload)
+                payload["cambio_exitoso"] = False
+                self.ws_server.send_to_client(websocket, payload)
+                return
+            ok = self.change_source(nueva_fuente)
+            payload = self._build_info_fuentes_payload()
+            payload["cambio_exitoso"] = ok
+            self.ws_server.broadcast_message(payload)
 
     def change_source(self, new_source: Union[int, str]) -> bool:
         """Cambia dinámicamente la fuente de video de la cámara."""
@@ -337,7 +379,13 @@ def main() -> None:
     if args.events_file is not None:
         config.events_output_file = args.events_file
 
-    app = VisionNodeApp(config, ws_port=args.ws_port)
+    try:
+        seguridad = AjustesSeguridad.desde_entorno(os.environ)
+    except ErrorConfiguracionSeguridad as e:
+        logger.error(f"Configuración de seguridad rechazada: {e}")
+        sys.exit(2)
+
+    app = VisionNodeApp(config, ws_port=args.ws_port, seguridad=seguridad)
     app.start()
 
 

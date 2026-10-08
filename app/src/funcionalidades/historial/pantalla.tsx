@@ -18,18 +18,18 @@ import { useEffect, useState } from "react";
 import { Download, Info, WifiOff } from "lucide-react";
 import { config } from "@/config/app.config";
 import {
-  exportarHistorialCsv,
+  exportarHistorialExcel,
   obtenerDiaSemana,
   obtenerHistorial,
   obtenerTendencia,
 } from "@/datos/api/historial.api";
 import type { ComparacionDiaSemana, DiaHistorial } from "@/dominio/tipos";
-import { AvisoDemo, Cargando, EstadoError } from "@/componentes/comunes/avisos";
+import { Cargando, EstadoError } from "@/componentes/comunes/avisos";
 import { BarrasDiaSemana, LineaTendencia } from "@/componentes/comunes/graficas";
 import { MapaCalor } from "@/componentes/comunes/mapa-calor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { descargarTexto, formatearNumero } from "@/utils/formato";
+import { descargarArchivo, formatearNumero } from "@/utils/formato";
 
 export function PantallaHistorial() {
   const [dias, setDias] = useState<DiaHistorial[] | null>(null);
@@ -59,8 +59,8 @@ export function PantallaHistorial() {
   async function exportar() {
     setExportando(true);
     try {
-      const { nombre, csv } = await exportarHistorialCsv();
-      descargarTexto(nombre, csv);
+      const { nombre, blob } = await exportarHistorialExcel();
+      descargarArchivo(nombre, blob);
     } catch (e) {
       setError(e);
     } finally {
@@ -95,7 +95,6 @@ export function PantallaHistorial() {
             puntos.
           </p>
         </div>
-        <AvisoDemo />
       </header>
 
       <Card>
@@ -113,7 +112,7 @@ export function PantallaHistorial() {
           <div data-slot="card-action" className="self-start">
             <Button variant="outline" size="sm" onClick={exportar} disabled={exportando}>
               <Download className="size-3.5" aria-hidden />
-              {exportando ? "Preparando..." : "Exportar CSV"}
+              {exportando ? "Preparando..." : "Exportar a Excel"}
             </Button>
           </div>
         </CardHeader>
@@ -171,14 +170,14 @@ export function PantallaHistorial() {
         <CardContent className="text-muted-foreground space-y-2 text-sm">
           <p className="flex items-start gap-2">
             <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-            El historial se guarda unicamente en este equipo, en una base de datos
-            local. Nunca se envia a ningun servidor. Puedes borrarlo cuando quieras
-            desde Ajustes.
+            Tu historial se guarda en tu cuenta, un resumen por dia (minutos
+            monitoreados, puntaje promedio y porcentaje de mala postura). No se
+            guarda video ni imagenes, y nadie mas puede ver tus dias individuales.
           </p>
           <p className="pl-6">
-            La exportacion incluye fecha, promedio del dia, minutos activos y si el
-            dia era festivo. Es el formato pensado para analizar los datos en Excel,
-            R o Python.
+            Solo cuenta el tiempo en que la camara te estuvo midiendo. La
+            exportacion en Excel incluye esas mismas columnas, con nombres que no
+            cambian entre versiones, para poder comparar un ano con otro.
           </p>
         </CardContent>
       </Card>

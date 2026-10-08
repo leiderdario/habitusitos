@@ -44,6 +44,11 @@ export const config = {
   /** Segundos que un patron candidato debe sostenerse antes de reemplazar el
    *  patron mostrado. Evita parpadeo por ruido de landmarks. */
   SEGUNDOS_SOSTENIDOS_PATRON: 3,
+  /** Ventana del panel de oficina: el promedio y el conteo por estado se
+   *  calculan sobre los ultimos N segundos, nunca sobre el frame actual — es
+   *  un semaforo de jornada, no de frame, para que la alerta grupal no
+   *  parpadee por un movimiento de 2 segundos de una sola persona. */
+  VENTANA_AGREGADO_OFICINA_SEGUNDOS: 300,
 
   // --- Baseline adaptativo (aporte 1 de tesis, seccion 11.1) ---
   /** Constante de tiempo del EMA, en SEGUNDOS. alpha se deriva de aqui y del
@@ -55,13 +60,6 @@ export const config = {
   /** Desviacion maxima permitida respecto al optimo ergonomico (salvaguarda 3),
    *  en unidades normalizadas de metrica [0,1]. */
   BASELINE_DERIVA_MAXIMA: 0.18,
-
-  // --- Benchmark de recursos (aporte 2, seccion 11.2) ---
-  /** Segundos de calentamiento que se descartan de cada corrida. Sin esto, las
-   *  primeras muestras incluyen el import de numpy/OpenCV y la carga del modelo. */
-  BENCHMARK_CALENTAMIENTO_SEGUNDOS: 15,
-  /** Intervalo de muestreo del benchmark. */
-  BENCHMARK_INTERVALO_SEGUNDOS: 1,
 
   // --- Comportamiento del mock ---
   /** Latencia artificial de la capa de datos. Sin ella la demostracion se siente
@@ -82,6 +80,8 @@ export const config = {
   LOCALE: "es-CO",
   TZ_PRESENTACION: "America/Bogota",
   PAIS_FESTIVOS: "CO",
+  /** Zona en que se interpreta "hoy" para el historial; la misma que usa la base de datos. */
+  ZONA_HORARIA: "America/Bogota",
 } as const;
 
 /**

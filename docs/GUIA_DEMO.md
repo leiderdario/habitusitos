@@ -19,7 +19,7 @@ npm run dev
 - [ ] Abre `/demo` y pulsa **Reiniciar la sesión**. Los escenarios se entienden mejor desde cero.
 - [ ] Prueba el permiso de cámara **en el equipo donde vas a presentar**. El navegador solo lo pide una vez por dominio, y no quieres descubrirlo en vivo.
 - [ ] Elige el tema según el proyector: el claro se lee mejor con luz ambiente alta.
-- [ ] Ten a mano [INVESTIGACION_2026.md](INVESTIGACION_2026.md) por si preguntan por las fuentes.
+- [ ] Ten a mano [MEMORY.md](../MEMORY.md) por si preguntan qué está construido de verdad y qué no.
 
 ---
 
@@ -95,18 +95,9 @@ Baja a la gráfica.
 
 ---
 
-### E5 · Consumo medido — 2 min · ruta `/benchmark`
-
-> "Esta pantalla convierte 'la aplicación es liviana' en una tabla que se puede defender."
-
-**Sé el primero en decirlo:**
-
-> "Ojo con el aviso de arriba: estas cifras son de ejemplo, no medidas. Lo que se demuestra aquí es el formato del entregable y la metodología. La medición real se hace con psutil sobre el software final."
-
-**Qué señalar:**
-- La zona sombreada del principio es el calentamiento, y **no entra en el promedio**. Incluye la carga de librerías y del modelo.
-- El FPS baja a propósito: procesar menos imágenes **es** la optimización. Lo que importa es que la tasa de detección apenas cambie.
-- El CPU siempre va junto al FPS. Sin saber la carga, un porcentaje no significa nada.
+> **E5 (consumo medido, ruta `/benchmark`) se eliminó el 2026-10-02** junto con toda la pantalla
+> de "Recursos" — ver `MEMORY.md`. Si hace falta defender la metodología de benchmark ante el
+> jurado, el código y el guion siguen en el historial de git.
 
 ---
 
@@ -135,11 +126,11 @@ Baja a los documentos.
 
 | Pregunta | Respuesta corta |
 |---|---|
-| *¿Esto es el producto?* | No. Es el prototipo navegable. El producto es una aplicación de escritorio Windows en Python. Lo que sí es real es la lógica de puntuación y el aporte de tesis. |
-| *¿Los números del benchmark son reales?* | No, y la pantalla lo dice. Son el formato del entregable. La medición real se hace con psutil sobre el software final. |
-| *¿Graba vídeo?* | Nunca. Se calcula y se descarta. No hay ninguna ruta de red de salida para datos de postura, y es auditable porque el código es abierto. |
-| *¿Por qué web y no Python?* | Para poder enseñar todas las pantallas antes de que exista el producto. La capa de lógica está escrita sin dependencias precisamente para traducirse línea por línea. |
-| *¿Cuánto falta?* | El orden de ataque está en [DE_MOCK_A_REAL.md](DE_MOCK_A_REAL.md), con los riesgos identificados. El mayor es el empaquetado: no existe hook de PyInstaller para MediaPipe. |
+| *¿Esto es el producto?* | Sí, en buena parte: `app/` es la aplicación web real, no solo un prototipo. Lo que falta es el panel de oficina multi-persona y la autenticación — ver [MEMORY.md](../MEMORY.md) "Pendiente". |
+| *¿Qué pasó con la pantalla de consumo de recursos?* | Se eliminó el 2026-10-02 junto con el resto de "Recursos" — era un formato de entregable simulado, no una medición real, y ya no forma parte de la interfaz. |
+| *¿Graba vídeo?* | Nunca. Se calcula y se descarta, tanto en `app/` como en `vision-node/`. El modo oficina sí abre una conexión de red (WebSocket) hacia `vision-node/` — es auditable porque el código es abierto, pero la promesa exacta de privacidad hacia participantes todavía está pendiente de confirmar, ver [docs/ARQUITECTURA.md](ARQUITECTURA.md) §8. |
+| *¿Por qué web y no un ejecutable de escritorio?* | Permite enseñar todas las pantallas sin esperar a terminar el empaquetado, y se integra directamente con el nodo de visión multi-persona por WebSocket. La capa de lógica (`dominio/`) sigue escrita sin dependencias externas por si hiciera falta reutilizarla en otro contexto. |
+| *¿Cuánto falta?* | El plan y las fases pendientes están en [docs/prompt_maestro_multipersona_oficina.md](prompt_maestro_multipersona_oficina.md); el cruce contra lo ya construido, en [MEMORY.md](../MEMORY.md). |
 | *¿Y si alguien no distingue los colores?* | Cada estado lleva color, forma y palabra. El mapa de calor es monocromo. Está diseñado para eso desde el principio. |
 
 ---

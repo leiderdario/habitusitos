@@ -102,17 +102,3 @@ export function EstadoError({
     </div>
   );
 }
-
-/**
- * Nota de que un dato es simulado.
- *
- * Se usa donde el numero podria confundirse con una medicion real — sobre todo
- * en el benchmark, cuyas cifras NO pueden citarse en el documento de tesis.
- */
-export function NotaSimulado({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-muted-foreground border-demo/40 border-l-2 py-0.5 pl-3 text-xs text-balance">
-      {children}
-    </p>
-  );
-}

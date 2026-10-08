@@ -100,10 +100,8 @@ export function formatearCambio(porcentaje: number): string {
   return `${signo}${formatearNumero(porcentaje, 1)}%`;
 }
 
-/** Descarga un texto como archivo. Es lo mas parecido a un guardado real que
- *  puede hacer un prototipo en navegador. */
-export function descargarTexto(nombre: string, contenido: string, tipo = "text/csv"): void {
-  const blob = new Blob([contenido], { type: `${tipo};charset=utf-8;` });
+/** Descarga un archivo generado en el navegador. */
+export function descargarArchivo(nombre: string, blob: Blob): void {
   const url = URL.createObjectURL(blob);
   const enlace = document.createElement("a");
   enlace.href = url;

@@ -203,33 +203,3 @@ export function tendenciaPorSemana(
       minutos: g.minutos,
     }));
 }
-
-/**
- * Traduce las estadisticas a una frase en espanol natural.
- *
- * La investigacion de tendencias 2026 en apps de bienestar es explicita: las
- * apps modernas "convierten los datos en guia clara en vez de actuar como
- * tableros de datos". Por eso el panel abre con una frase y las graficas van
- * debajo, no al reves.
- */
-export function resumirEnPalabras(
-  stats: EstadisticasSesion,
-  diferenciaConAyer: number | null,
-): string {
-  if (stats.muestras === 0) {
-    return "Todavia no hay datos de hoy. En cuanto te sientes frente a la camara empiezo a medir.";
-  }
-
-  const horas = Math.floor(stats.duracionActivaSegundos / 3600);
-  const minutos = Math.round((stats.duracionActivaSegundos % 3600) / 60);
-  const tiempo = horas > 0 ? `${horas} h ${minutos} min` : `${minutos} min`;
-  const buenos = Math.round(stats.proporcionBuenaPostura * 100);
-
-  const base = `Llevas ${tiempo} de sesion y mantuviste buena postura el ${buenos}% del tiempo.`;
-
-  if (diferenciaConAyer === null) return base;
-  if (Math.abs(diferenciaConAyer) < 2) return `${base} Vas parecido a ayer.`;
-  return diferenciaConAyer > 0
-    ? `${base} Vas ${Math.round(diferenciaConAyer)} puntos mejor que ayer.`
-    : `${base} Hoy vas ${Math.abs(Math.round(diferenciaConAyer))} puntos por debajo de ayer.`;
-}
