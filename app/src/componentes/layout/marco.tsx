@@ -26,7 +26,6 @@ import { LogoEspinker } from "@/componentes/comunes/logo-espinker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FranjaBandeja, NotificacionesEscritorio } from "./franja-bandeja";
-import { SelectorTema } from "./selector-tema";
 
 interface ItemNavegacion {
   a: string;
@@ -113,7 +112,6 @@ export function Marco() {
         </nav>
 
         <div className="border-border space-y-2 border-t p-2">
-          <SelectorTema conTexto={abierta} className={abierta ? undefined : "w-full"} />
           <Button
             variant="ghost"
             size="sm"

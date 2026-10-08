@@ -102,7 +102,7 @@ export function PantallaPanelPersonal() {
     : presentacion.descripcion;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="mx-auto max-w-[110rem] space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Panel de hoy</h1>
@@ -113,76 +113,71 @@ export function PantallaPanelPersonal() {
         <AvisoDemo />
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="space-y-4">
+      {/* La camara va primera en el DOM: en pantallas angostas queda arriba y el
+          orden de tabulacion sigue el orden visual (camara, controles, rieles).
+          Desde el breakpoint `ancho` (1360 px) los rieles se colocan a los lados con posiciones
+          explicitas; por debajo, la camara ocupa el ancho (con tope) y los rieles
+          van en dos columnas. 1360 y no `xl`: a 1280 la camara central quedaba en
+          unos 440 px, menos de lo que pide que sea la protagonista. */}
+      <div className="grid gap-4 lg:grid-cols-2 ancho:grid-cols-[12.5rem_minmax(0,1fr)_16rem] 2xl:grid-cols-[15rem_minmax(0,1fr)_19rem]">
+        <div className="mx-auto w-full max-w-[44rem] min-w-0 lg:col-span-2 ancho:col-span-1 ancho:col-start-2 ancho:row-start-1 ancho:max-w-none">
+          <VistaCamara
+            modoCamara={modoCamara}
+            onCambiarModo={cambiarModoCamara}
+            fuenteCamara="webcam"
+            estado={camara.estado}
+            error={camara.error}
+            origenRecursos={camara.origenRecursos}
+            videoRef={camara.videoRef}
+            landmarks={camara.pose?.landmarks ?? null}
+            worldLandmarks={camara.pose?.worldLandmarks ?? null}
+            presentacion={presentacion}
+            perspectiva={perspectiva}
+            onCambiarPerspectiva={cambiarPerspectiva}
+            calibracionPostural={calibracionPostural}
+            dispositivosVideo={camara.dispositivosVideo}
+            idDispositivoSeleccionado={camara.idDispositivoSeleccionado}
+            onSeleccionarDispositivo={camara.seleccionarDispositivo}
+            onMarcaPosturaNeutra={() => marcarPosturaNeutra(camara.pose)}
+            onLimpiarCalibracion={() => limpiarCalibracionPostural()}
+          />
+        </div>
+
+        <aside className="space-y-4 ancho:col-start-1 ancho:row-start-1" aria-label="Estado y resumen de hoy">
           <Card>
-            <CardContent className="grid gap-6 pt-6 sm:grid-cols-[1fr_auto] sm:items-center">
-              <VistaCamara
-                modoCamara={modoCamara}
-                onCambiarModo={cambiarModoCamara}
-                fuenteCamara="webcam"
-                estado={camara.estado}
-                error={camara.error}
-                origenRecursos={camara.origenRecursos}
-                videoRef={camara.videoRef}
-                landmarks={camara.pose?.landmarks ?? null}
-                worldLandmarks={camara.pose?.worldLandmarks ?? null}
-                presentacion={presentacion}
-                perspectiva={perspectiva}
-                onCambiarPerspectiva={cambiarPerspectiva}
-                calibracionPostural={calibracionPostural}
-                dispositivosVideo={camara.dispositivosVideo}
-                idDispositivoSeleccionado={camara.idDispositivoSeleccionado}
-                onSeleccionarDispositivo={camara.seleccionarDispositivo}
-                onMarcaPosturaNeutra={() => marcarPosturaNeutra(camara.pose)}
-                onLimpiarCalibracion={() => limpiarCalibracionPostural()}
+            <CardContent className="flex flex-col items-center gap-3 pt-6 text-center">
+              <FormaEstado
+                forma={presentacion.forma}
+                tamano={64}
+                className={clasesEstado(presentacion.tokenColor).texto}
               />
-              <div className="flex flex-col items-center gap-3">
-                <FormaEstado
-                  forma={presentacion.forma}
-                  tamano={72}
-                  className={clasesEstado(presentacion.tokenColor).texto}
-                />
-                <InsigniaEstado presentacion={presentacion} tamano="lg" />
-                <p className="text-muted-foreground max-w-[220px] text-center text-xs text-balance">
-                  {mensajePrincipal}
-                </p>
-              </div>
+              <InsigniaEstado presentacion={presentacion} tamano="lg" />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tendencia de la sesion</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SparklineSesion
-                datos={serie}
-                umbral={ajustes.notificaciones.umbralMalaPostura}
-              />
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Indicador
+          <section
+            className="bg-secondary text-secondary-foreground space-y-4 rounded-xl p-4"
+            aria-label="Cifras de hoy"
+          >
+            <Cifra
               icono={Timer}
               etiqueta="Tiempo activo"
               valor={formatearDuracion(stats.duracionActivaSegundos)}
               nota="Sin contar el tiempo que estuviste fuera"
             />
-            <Indicador
+            <Cifra
               icono={Flame}
               etiqueta="Racha actual"
               valor={formatearDuracion(stats.rachaActualSegundos)}
               nota={`Tu mejor racha hoy: ${formatearDuracion(stats.mejorRachaSegundos)}`}
             />
-            <Indicador
+            <Cifra
               icono={TrendingUp}
               etiqueta="Buena postura"
               valor={formatearPorcentaje(stats.proporcionBuenaPostura * 100)}
               nota={`Promedio de la sesion: ${formatearNumero(stats.promedio, 1)}`}
             />
-            <Indicador
+            <Cifra
               icono={TrendingDown}
               etiqueta="Ultimos 15 minutos"
               valor={
@@ -198,10 +193,10 @@ export function PantallaPanelPersonal() {
                     : "Te mantienes en tu nivel habitual"
               }
             />
-          </div>
-        </div>
+          </section>
+        </aside>
 
-        <Card className="lg:sticky lg:top-4 lg:self-start">
+        <Card className="ancho:sticky ancho:top-4 ancho:col-start-3 ancho:row-start-1 ancho:self-start">
           <CardHeader>
             <CardTitle>De que se compone tu puntaje</CardTitle>
           </CardHeader>
@@ -214,12 +209,24 @@ export function PantallaPanelPersonal() {
             />
           </CardContent>
         </Card>
+
+        <Card className="lg:col-span-2 ancho:col-span-3">
+          <CardHeader>
+            <CardTitle>Tendencia de la sesion</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SparklineSesion
+              datos={serie}
+              umbral={ajustes.notificaciones.umbralMalaPostura}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
 
-function Indicador({
+function Cifra({
   icono: Icono,
   etiqueta,
   valor,
@@ -231,15 +238,13 @@ function Indicador({
   nota: string;
 }) {
   return (
-    <Card>
-      <CardContent className="space-y-1 pt-5">
-        <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
-          <Icono className="size-3.5" aria-hidden />
-          {etiqueta}
-        </p>
-        <p className="tabular text-xl font-semibold">{valor}</p>
-        <p className="text-muted-foreground text-xs text-balance">{nota}</p>
-      </CardContent>
-    </Card>
+    <div className="space-y-0.5">
+      <p className="flex items-center gap-1.5 text-xs font-medium">
+        <Icono className="size-3.5" aria-hidden />
+        {etiqueta}
+      </p>
+      <p className="tabular text-xl font-semibold">{valor}</p>
+      <p className="text-xs text-balance">{nota}</p>
+    </div>
   );
 }

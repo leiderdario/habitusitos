@@ -128,6 +128,17 @@ Medido tras el cambio: **salto máximo de 1 punto entre ticks** (antes, varios).
 
 ---
 
+## 5.1 Composición de la pantalla principal
+
+La cámara es la protagonista: va **al centro**, dentro de un marco de madera de bordes muy redondeados, con un anillo interior del color del estado (un canal más; la forma y el texto siguen en la insignia). Sus controles van **en una sola barra debajo del video**, siempre en el mismo sitio, con objetivos de 40 px de alto. Nada de lo que se pulsa tapa la imagen.
+
+- Desde 1360 px: estado y cifras del día a la izquierda (las cifras sobre salvia), cámara al centro, desglose del puntaje a la derecha (fijo al hacer scroll) y la tendencia debajo, a todo el ancho.
+- De 1024 a 1359 px: la cámara arriba (tope de 44 rem) y los dos rieles en dos columnas.
+- Por debajo de 1024 px: una columna, con la cámara primero.
+- El orden del DOM es el orden de tabulación: cámara, barra de controles, rieles.
+
+---
+
 ## 6. Interacción y formularios
 
 | Regla | Aplicación |

@@ -19,6 +19,7 @@ import { clasesEstado } from "@/componentes/comunes/insignia-estado";
 import { Button } from "@/components/ui/button";
 import { formatearDuracion } from "@/utils/formato";
 import { cn } from "@/lib/utils";
+import { SelectorTema } from "./selector-tema";
 
 export function FranjaBandeja() {
   const presentacion = useSimulacion((s) => s.presentacion);
@@ -54,6 +55,7 @@ export function FranjaBandeja() {
       </span>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <SelectorTema />
         {modoEnfoque && (
           <span className="text-muted-foreground flex items-center gap-1 text-xs">
             <BellOff className="size-3.5" aria-hidden />

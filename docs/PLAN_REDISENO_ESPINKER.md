@@ -305,7 +305,26 @@ desde una CDN externa, para que el login no dependa de un tercero.
   complemento visual, nada del acceso depende de ella.
 - **Respaldo:** si el navegador no tiene WebGL, se muestra el panel azul liso con la frase de valor.
 
-### Fase 4 — Pantalla principal: la cámara al centro
+### Fase 4 — Pantalla principal: la cámara al centro ✅ (2026-10-08)
+
+> **Cómo quedó, y en qué se apartó de lo escrito abajo:**
+> - Punto de corte de tres columnas en **1360 px** (breakpoint `ancho` en `index.css`), no 1280: a 1280 la
+>   cámara central quedaba en ~440 px. Por debajo, la cámara ocupa el ancho (tope de 44 rem) y los rieles
+>   van en dos columnas. Medido: 559 px a 1366, 601 px a 1440, 1025 px a 1920 (antes ~360 px).
+> - Un `min-[1360px]:` arbitrario no sirvió: Tailwind lo ordena antes que `lg:` y se pisaban. Por eso el
+>   breakpoint del tema.
+> - `VistaCamara` conserva su interfaz (la usan el panel personal y el de oficina) y se divide en
+>   `camara/marco-video.tsx`, `camara/barra-controles-camara.tsx`, `camara/tarjeta-calibracion.tsx`,
+>   `camara/dibujar-esqueleto.ts`, `camara/silueta-simulada.tsx`, `camara/calibracion.ts`. 615 → 138 líneas;
+>   ninguna lógica de cámara, puntaje ni calibración cambió.
+> - El botón de calibración pasó a la barra de controles; la tarjeta quedó como una línea de texto.
+> - Corrección de paso: el bloque de calibración ya no aparece en el panel de oficina (nunca tuvo efecto ahí).
+> - Los avisos sobre el video usan superficies sólidas con texto de contraste verificado, en vez de
+>   rojo/azul translúcido sobre la imagen.
+> - El botón sol/luna se movió de la barra lateral a la franja superior, y `SelectorTema` perdió su variante con texto.
+> - Verificado en Chromium por DevTools Protocol con sesión simulada: 1920, 1440, 1366, 1280, 1024 y 390 px,
+>   claro y oscuro, sin desborde horizontal ni errores de consola; con una cámara falsa se comprobó la barra
+>   con la cámara encendida. **Falta ver con una persona real frente a la cámara** (el esqueleto sobre el video).
 
 **Distribución (≥ 1280 px):**
 

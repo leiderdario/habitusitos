@@ -80,7 +80,7 @@ export function PantallaPanelOficina() {
     agregado.personasActivas > 0 && proporcionMalaPostura(agregado.conteoPorEstado) > 0.5;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5">
+    <div className="mx-auto max-w-[110rem] space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Panel de oficina</h1>
@@ -109,35 +109,33 @@ export function PantallaPanelOficina() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <Card>
-          <CardContent className="pt-6">
-            <VistaCamara
-              modoCamara={modoCamara}
-              onCambiarModo={cambiarModoCamara}
-              fuenteCamara="oficina"
-              personas={personas}
-              estadoConexionVisionNode={estadoConexionVisionNode}
-              ticketVideoOficina={ticketVideoOficina}
-              estado={camara.estado}
-              error={camara.error}
-              origenRecursos={camara.origenRecursos}
-              videoRef={camara.videoRef}
-              landmarks={null}
-              presentacion={presentacionPromedio}
-              perspectiva="frente"
-              onCambiarPerspectiva={() => {}}
-              calibracionPostural={calibracionPostural}
-              camarasOficinaDisponibles={camarasOficinaDisponibles}
-              fuenteOficinaActual={fuenteOficinaActual}
-              onCambiarFuenteOficina={camara.cambiarFuenteOficina}
-              onMarcaPosturaNeutra={() => {}}
-              onLimpiarCalibracion={() => {}}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="min-w-0">
+          <VistaCamara
+            modoCamara={modoCamara}
+            onCambiarModo={cambiarModoCamara}
+            fuenteCamara="oficina"
+            personas={personas}
+            estadoConexionVisionNode={estadoConexionVisionNode}
+            ticketVideoOficina={ticketVideoOficina}
+            estado={camara.estado}
+            error={camara.error}
+            origenRecursos={camara.origenRecursos}
+            videoRef={camara.videoRef}
+            landmarks={null}
+            presentacion={presentacionPromedio}
+            perspectiva="frente"
+            onCambiarPerspectiva={() => {}}
+            calibracionPostural={calibracionPostural}
+            camarasOficinaDisponibles={camarasOficinaDisponibles}
+            fuenteOficinaActual={fuenteOficinaActual}
+            onCambiarFuenteOficina={camara.cambiarFuenteOficina}
+            onMarcaPosturaNeutra={() => {}}
+            onLimpiarCalibracion={() => {}}
+          />
+        </div>
 
-        <Card>
+        <Card className="xl:self-start">
           <CardContent className="flex flex-col items-center gap-4 pt-6 text-center">
             <FormaEstado
               forma={presentacionPromedio.forma}

@@ -299,6 +299,17 @@ sigue en 152 tests y build limpio. Pasos manuales: ejecutar 0001→0005 y la pru
 
 ---
 
+### 2026-10-08 · Rediseño UX/UI de Espinker (Fases 0 a 4)
+
+Plan y decisiones en [docs/PLAN_REDISENO_ESPINKER.md](docs/PLAN_REDISENO_ESPINKER.md). Hecho, con commit por fase:
+nombre visible Espinker (las claves de `localStorage` conservan el nombre anterior a propósito), paleta azul
+profundo + salvia + madera con test de contraste (`contraste.test.ts`), login 55/45 con la columna 3D de Z-Anatomy
+(`public/3d/columna.glb`, CC BY-SA 4.0, regenerable con `herramientas/3d/exportar_columna.py` y Blender), tema de
+dos estados y panel principal con la cámara al centro. **Falta:** Fase 5 (quitar avisos de demostración y reescribir
+CLAUDE.md §5/§10) y Fase 6 (verificación final). Entorno: Blender y Chromium se ejecutan con `flatpak-spawn --host`.
+
+---
+
 ## Pendiente
 
 Cruce entre `feedback.md` (lo que pidió el usuario) y lo construido:

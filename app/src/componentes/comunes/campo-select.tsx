@@ -14,6 +14,7 @@
 
 import type { ReactNode } from "react";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -34,14 +35,28 @@ interface Props {
   valor: string;
   opciones: readonly OpcionSelect[];
   onCambio(valor: string): void;
+  /** Etiqueta solo para lectores de pantalla, para insertar el desplegable en una barra de controles. */
+  etiquetaOculta?: boolean;
+  className?: string;
+  claseDisparador?: string;
 }
 
-export function CampoSelect({ id, etiqueta, ayuda, valor, opciones, onCambio }: Props) {
+export function CampoSelect({
+  id,
+  etiqueta,
+  ayuda,
+  valor,
+  opciones,
+  onCambio,
+  etiquetaOculta = false,
+  className,
+  claseDisparador,
+}: Props) {
   const seleccionada = opciones.find((o) => o.valor === valor);
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-sm">
+    <div className={cn("space-y-1.5", className)}>
+      <Label htmlFor={id} className={cn("text-sm", etiquetaOculta && "sr-only")}>
         {etiqueta}
       </Label>
       <Select
@@ -52,7 +67,7 @@ export function CampoSelect({ id, etiqueta, ayuda, valor, opciones, onCambio }: 
           if (v !== null) onCambio(String(v));
         }}
       >
-        <SelectTrigger id={id} className="w-full">
+        <SelectTrigger id={id} className={cn("w-full", claseDisparador)}>
           <SelectValue>{seleccionada?.texto ?? valor}</SelectValue>
         </SelectTrigger>
         <SelectContent>

@@ -95,6 +95,11 @@
   --color-calor-4: var(--calor-4);
   --color-calor-5: var(--calor-5);
 
+  /* Punto de corte propio (1360 px) para el panel de tres columnas. Es un
+     breakpoint del tema y no `min-[1360px]:` porque Tailwind ordena las
+     variantes arbitrarias ANTES que `lg:` y estas se pisaban entre si. */
+  --breakpoint-ancho: 85rem;
+
   --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
 
