@@ -423,7 +423,7 @@ function PasoFinal() {
 function Punto({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2">
-      <span className="bg-accent/15 text-accent mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full">
+      <span className="bg-secondary text-secondary-foreground mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full">
         <Check className="size-2.5" aria-hidden />
       </span>
       <span className="text-muted-foreground text-balance">{children}</span>

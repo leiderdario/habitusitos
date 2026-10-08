@@ -100,7 +100,7 @@ export function PantallaAntecedentes() {
       </header>
 
       <div
-        className="border-demo/30 bg-demo-suave text-demo flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs"
+        className="border-nota/30 bg-nota-suave text-nota flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs"
         role="note"
       >
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden />

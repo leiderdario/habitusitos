@@ -1,4 +1,4 @@
-# Sistema de diseño — Habitusitos
+# Sistema de diseño — Espinker
 
 | Campo | Detalle |
 |---|---|
@@ -6,6 +6,7 @@
 | Criterio de accesibilidad | **WCAG 2.2 AA** — el único citable hoy (ver nota sobre APCA abajo) |
 | Fuente única de tokens | [`app/src/index.css`](../app/src/index.css) |
 | Regla dura | **Ningún componente escribe un hex crudo.** Verificada por test |
+| Contraste | Cada par de tokens que la interfaz usa se verifica en `app/src/contraste.test.ts`, en los dos temas |
 
 ---
 
@@ -18,7 +19,14 @@ Eso descarta dos caminos obvios:
 - **El clínico frío** (azules corporativos, gris hospital): comunica "te están midiendo".
 - **El de dashboard técnico** (verde/rojo saturados sobre fondo oscuro): comunica "algo va mal".
 
-La dirección elegida es un **teal sereno** como primario. Está lo bastante cerca del azul médico para leerse como salud, y lo bastante lejos del rojo/verde de semáforo para no sentirse punitivo.
+La paleta, aprobada el 2026-10-08 (ver [PLAN_REDISENO_ESPINKER.md](PLAN_REDISENO_ESPINKER.md), Fase 0), combina cuatro familias con un papel fijo cada una:
+
+- **Azul profundo**: estructura y marca. Transmite confianza sin el frío de hospital porque se acompaña de neutros cálidos.
+- **Verde salvia**: secciones suaves y agrupaciones. Es apagado a propósito.
+- **Madera**: bordes gruesos y detalles (marco de la cámara, logotipo, notas). Aporta calidez.
+- **Crema**: el fondo de lectura en claro y el texto en oscuro.
+
+Ninguna de las cuatro comunica el estado postural. Hasta esta versión, el primario teal y el estado "buena" eran el mismo tono, y un botón se leía igual que un "vas bien": esa fue la razón del cambio de paleta.
 
 ---
 
@@ -28,10 +36,15 @@ La dirección elegida es un **teal sereno** como primario. Está lo bastante cer
 
 | Rol | Claro | Oscuro | Nota |
 |---|---|---|---|
-| Primario | `#0E7490` teal sereno | luminancia elevada | El teal oscuro no alcanza contraste sobre fondo oscuro |
-| Acento | `#059669` verde | idem | Confirmaciones, privacidad, aportes de tesis |
-| Fondo | casi blanco con matiz frío | azul muy oscuro | |
-| Texto secundario | 4,6:1 sobre el fondo | 4,7:1 | Ajustado **hasta** cumplir AA, no por gusto |
+| Primario (`--primary`) | azul profundo `#193763` | azul claro `#89beeb` | Sobre fondo azul, el botón no puede ser azul profundo |
+| Secundario y hover (`--secondary`, `--accent`) | salvia `#d7ebd7` | salvia apagada `#293e2d` | shadcn usa `accent` como fondo de hover en menús |
+| Madera (`--madera`, `--madera-suave`) | `#895e3c` / `#e4ccb6` | `#c99a70` / `#543d2a` | Nunca en botones ni estados: un botón café parece deshabilitado |
+| Fondo / tarjeta | crema `#faf6ee` / `#fffdfa` | azul profundo `#0a182d` / `#15253d` | En oscuro el azul pasa a ser el fondo |
+| Texto / texto secundario | `#102239` / `#4c5d6e` | `#f4f0e7` / `#a1b4c3` | 14,9:1 y 6,7:1 (claro); 15,6:1 y 7,2:1 (oscuro) |
+| Borde de controles (`--input`) | `#738292` | `#6e8398` | ≥ 3:1 (WCAG 1.4.11). `--border` es solo decorativo |
+| Notas informativas (`--nota`) | madera oscura sobre crema | madera clara sobre café | Reemplaza al antiguo token `--demo` |
+
+Los hex son orientativos (conversión de los OKLCH de `index.css`, que es la única fuente).
 
 Todos los tokens están en OKLCH dentro de `@theme` de Tailwind v4. No hay `tailwind.config.js`: en v4 se ignora por defecto.
 
@@ -39,22 +52,22 @@ Todos los tokens están en OKLCH dentro de `@theme` de Tailwind v4. No hay `tail
 
 | Estado | Color | Forma | Palabra |
 |---|---|---|---|
-| Excelente / Buena | teal profundo | círculo con visto | "Excelente" / "Buena" |
-| Vigilando | ámbar | triángulo | "Atento" |
-| Corrige | **ladrillo apagado**, no rojo alarma | octágono | "Corrige" |
+| Excelente / Buena | **verde saturado**, más vivo que la salvia | círculo con visto | "Excelente" / "Buena" |
+| Vigilando | ámbar dorado, lejos del café de la madera | triángulo | "Atento" |
+| Corrige | **coral apagado** (matiz ~18°), no rojo alarma ni ladrillo | octágono | "Corrige" |
 | Pausa | gris azulado | dos barras | "En pausa" |
 
-El ladrillo apagado en lugar de `#DC2626` no es una preferencia estética: es el §9.1 aplicado. Un rojo de alarma de incendio en una aplicación de bienestar comunica emergencia, y aquí nunca hay una emergencia.
+El coral apagado en lugar de `#DC2626` no es una preferencia estética: es el §9.1 aplicado. Un rojo de alarma de incendio en una aplicación de bienestar comunica emergencia, y aquí nunca hay una emergencia.
 
-Los tres colores de estado pasan **≥ 4,5:1** sobre la superficie de tarjeta, en ambos temas.
+Los cuatro colores de estado pasan **≥ 4,5:1** sobre la tarjeta y sobre su propia variante suave, en ambos temas (verificado por test).
 
 ### 2.3 Gráficas: nunca rojo/verde como único par
 
-El mapa de calor usa una **escala monocroma teal de cinco pasos**. Una escala verde→rojo es ilegible para el daltonismo rojo-verde, que afecta a cerca del 8 % de los hombres; en una prueba con 15–70 participantes, eso son varias personas que no verían nada.
+El mapa de calor usa una **escala monocroma azul de cinco pasos**. Una escala verde→rojo es ilegible para el daltonismo rojo-verde, que afecta a cerca del 8 % de los hombres; en una prueba con 15–70 participantes, eso son varias personas que no verían nada.
 
 Con escala monocroma la información está en la **luminancia**, que se percibe igual con cualquier tipo de visión del color.
 
-La escala de series (`--chart-1` a `--chart-5`) es monocroma azul con un ámbar de contraste, por la misma razón.
+La escala de series (`--chart-1` a `--chart-5`) combina dos azules, una salvia, una madera y un gris, todos ≥ 3:1 sobre la tarjeta, por la misma razón.
 
 ---
 
@@ -157,7 +170,7 @@ Comprobado por test: `resumirEnPalabras` falla si la frase generada contiene cua
 
 Diseñados **juntos**, no uno derivado del otro. El error habitual —añadir el modo oscuro tarde e invertir los colores— produce contraste insuficiente y saturaciones imposibles.
 
-Cada paleta tiene sus propios valores y **su contraste se verificó por separado**. El primario, por ejemplo, no es el mismo tono con otra luminancia: el teal oscuro simplemente no alcanza contraste sobre fondo oscuro.
+Cada paleta tiene sus propios valores y **su contraste se verificó por separado**. El primario, por ejemplo, no es el mismo tono con otra luminancia: el azul profundo desaparece sobre el fondo azul del modo oscuro, así que ahí pasa a azul claro.
 
 Por defecto se sigue **la preferencia del sistema**, como pide el §9.1 (adaptarse al modo claro/oscuro de Windows). El tema se aplica **antes del primer render** para evitar el destello blanco.
 
@@ -173,7 +186,7 @@ Cualquier decisión de contraste justificada con APCA es indefendible ante un ju
 
 ## 10. Cómo extenderlo
 
-1. **¿Falta un color?** Se añade como token en `index.css`, en las dos paletas, y se verifica el contraste en ambas. Nunca un hex en un componente — hay un test que lo impide.
+1. **¿Falta un color?** Se añade como token en `index.css`, en las dos paletas, y si forma un par de texto o de control se añade a `contraste.test.ts`. Nunca un hex en un componente — hay un test que lo impide.
 2. **¿Un estado nuevo?** Necesita las tres cosas: token de color, forma propia distinguible a 16 px, y etiqueta de texto.
 3. **¿Una gráfica nueva?** Usa `Grafica` de [`graficas.tsx`](../app/src/componentes/comunes/graficas.tsx): ya trae estado vacío, rejilla de bajo contraste y tooltip accesible. Un eje sin datos parece un error de carga, no una ausencia de información.
 4. **¿Copy nuevo?** Pasa por el filtro de la sección 7. Si un participante de la prueba no lo entendería, se reescribe.

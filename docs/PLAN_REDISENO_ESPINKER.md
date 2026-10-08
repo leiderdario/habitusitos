@@ -121,8 +121,10 @@ toca, en los dos temas. Ninguna fase mezcla cambios funcionales con cambios visu
   | columna (3D) | `oklch(0.88 0.03 80)` | `oklch(0.9 0.03 80)` | decorativo |
   | video (fondo cámara) | `oklch(0.3 0.03 250)` | `oklch(0.16 0.03 258)` | — |
 
-  Pendiente de derivar en la Fase 2 con el mismo criterio (y verificar): variantes `*-suave` de los
-  estados, escala de gráficas y mapa de calor, `--ring`, `--destructive` y `--nota`.
+  Derivados en la Fase 2 con el mismo criterio y verificados por `contraste.test.ts`: variantes
+  `*-suave` de los estados, gráficas, mapa de calor, `--ring`, `--destructive` y `--nota`. Único
+  ajuste sobre lo aprobado: `--input` en oscuro sube de `0.58` a `0.6` de luminancia para dejar margen
+  sobre el mínimo de 3:1.
 - ✅ **Modelo 3D de la columna preparado (2026-10-08).** `app/public/3d/columna.glb`: 25 mallas
   (`C1`…`L5`, `Sacro`), ~71 800 triángulos, **258 KB** con Draco, comprobado al reimportarlo y con un
   render de frente y de lado. Lo genera `herramientas/3d/exportar_columna.py` con Blender 5.2 (sin
@@ -130,7 +132,7 @@ toca, en los dos temas. Ninguna fase mezcla cambios funcionales con cambios visu
   `app/public/3d/LICENCIA.md`. No hizo falta reducir polígonos: las mallas de Z-Anatomy ya son ligeras.
   La plantilla descargada (no versionada) queda en `~/.cache/espinker-3d/`.
 
-### Fase 1 — Rebranding a Espinker (solo texto visible)
+### Fase 1 — Rebranding a Espinker (solo texto visible) ✅ (2026-10-08)
 
 Archivos con el nombre en la interfaz:
 
@@ -160,7 +162,7 @@ aparece en las claves de almacenamiento que **no** se tocan. `CLAUDE.md` §4 se 
 Se añade un test sencillo que falle si aparece "Habitusitos" en texto de interfaz (mismo patrón que
 el test de jerga prohibida).
 
-### Fase 2 — Paleta y tokens
+### Fase 2 — Paleta y tokens ✅ (2026-10-08)
 
 Solo `app/src/index.css` y `docs/SISTEMA_DISENO.md`; ningún componente cambia de clases todavía.
 

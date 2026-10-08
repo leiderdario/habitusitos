@@ -24,7 +24,7 @@ export function AvisoDemo({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "border-demo/30 bg-demo-suave text-demo flex items-center gap-2 rounded-lg border px-3 py-2 text-xs",
+        "border-nota/30 bg-nota-suave text-nota flex items-center gap-2 rounded-lg border px-3 py-2 text-xs",
         className,
       )}
       role="note"

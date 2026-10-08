@@ -16,13 +16,13 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { APP } from "@/config/app.config";
 import { useInterfaz } from "@/estado/interfaz";
 import { useSimulacion } from "@/estado/simulacion";
 import { useSesionUsuario } from "@/estado/sesion-usuario";
+import { LogoEspinker } from "@/componentes/comunes/logo-espinker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FranjaBandeja, NotificacionesEscritorio } from "./franja-bandeja";
@@ -83,9 +83,7 @@ export function Marco() {
         )}
       >
         <div className="flex h-14 items-center gap-2 px-4">
-          <span className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-lg">
-            <Sparkles className="size-4" aria-hidden />
-          </span>
+          <LogoEspinker />
           {abierta && (
             <span className="truncate font-semibold tracking-tight">{APP.nombre}</span>
           )}

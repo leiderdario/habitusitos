@@ -159,7 +159,7 @@ export function MapaCalor({ dias, className }: Props) {
                         className={cn(
                           "size-[18px] rounded-[4px] transition-transform group-hover:scale-115",
                           CLASE_NIVEL[nivel],
-                          dia.esFestivo && "franja-demo ring-demo/50 ring-1 ring-inset",
+                          dia.esFestivo && "franja-festivo ring-nota/50 ring-1 ring-inset",
                         )}
                         aria-hidden
                       />

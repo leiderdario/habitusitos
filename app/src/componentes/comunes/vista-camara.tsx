@@ -580,7 +580,7 @@ export function VistaCamara({
       )}
 
       <p className="text-muted-foreground flex items-start gap-1.5 text-xs text-balance">
-        <ShieldCheck className="text-accent mt-0.5 size-3.5 shrink-0" aria-hidden />
+        <ShieldCheck className="text-primary mt-0.5 size-3.5 shrink-0" aria-hidden />
         El video nunca se guarda ni se envia a ningun servidor. Solo se calculan
         angulos y puntajes, y se quedan en este equipo.
       </p>
