@@ -70,6 +70,22 @@ Genera cuatro PDF y dos CSV en `app/public/documentos/`. Solo necesita **Python 
 | `npm run verificar` | Los tres anteriores seguidos |
 | `npm run preparar-camara` | Copia local de los recursos de MediaPipe |
 
+### Cuenta de prueba en local
+
+Registrarse desde la pantalla de acceso puede fallar con un error de "No pudimos guardar tu historial":
+Supabase trae **"Confirm email" activado** por defecto, así que el registro crea la cuenta pero no abre
+sesión hasta confirmar el correo, y el perfil no se puede guardar (detalle en el punto 43 de
+[docs/PREGUNTAS_Y_MEJORAS.md](docs/PREGUNTAS_Y_MEJORAS.md)). Para trabajar en local hay dos caminos:
+
+1. **Cuentas ya creadas (recomendado):** pegar [supabase/semillas/cuentas_prueba.sql](supabase/semillas/cuentas_prueba.sql)
+   en el SQL Editor del dashboard. Crea `prueba.personal@example.com` y `prueba.oficina@example.com`, ya
+   confirmadas y con su perfil, con una **contraseña al azar que solo aparece en el resultado** (no está en el
+   repositorio: la base de desarrollo y la de producción son la misma). Se puede repetir para renovarla.
+2. **Desactivar "Confirm email"** en el dashboard (Authentication → Sign In / Providers → Email) y registrarse
+   desde la pantalla. Conviene volver a activarlo antes de abrir la aplicación a personas reales.
+
+Al entrar por primera vez la cuenta pasa por la pantalla de consentimiento, como cualquier persona.
+
 ---
 
 ## Las pantallas

@@ -130,6 +130,24 @@
     antes del uso real. ¿Se agrega caducidad y rotación?
 42. 🟢 **N6/N7** — Dejar de guardar el correo de los intentos fallidos y activar CAPTCHA para inicios anónimos.
 
+### Registro de cuentas (hallazgo del 2026-10-08)
+43. 🔴 **El registro falla con "Confirm email" activado, y el mensaje es engañoso.** Causa raíz, comprobada
+    contra la configuración pública del proyecto (`mailer_autoconfirm: false`): `signUp` crea la cuenta pero no
+    devuelve sesión hasta confirmar el correo; `registrarse()` (`datos/api/auth.api.ts`) inserta el perfil desde
+    el cliente justo después, como `anon`, y la migración 0004 no concede `insert` a `anon`, así que la base lo
+    rechaza (`permission denied for table usuarios`; reproducido en una base desechable). Esa excepción se
+    convierte en `fallo-base-datos`, cuyo texto de catálogo habla de "disco lleno" e "historial": no tiene nada
+    que ver. Además queda una cuenta huérfana sin perfil. **No es un problema solo de local:** en producción pasará
+    igual mientras la confirmación esté activa. Opciones: (a) desactivar "Confirm email" (solo vale para un piloto
+    cerrado); (b) **crear el perfil con un trigger en `auth.users`** leyendo `user_metadata` (migración 0007; el
+    cliente pasa `nombre` y `modo_uso` en `signUp({ options: { data } })`) y mostrar "revisa tu correo para
+    confirmar"; (c) crear el perfil de forma perezosa en el primer inicio de sesión. Recomendación del agente: (b),
+    es la forma estándar y no depende de que el cliente llegue a ejecutar el segundo paso. Mientras se decide:
+    `supabase/semillas/cuentas_prueba.sql`. Sin hacer: ni la migración ni el cambio en `auth.api.ts`.
+44. 🟡 **El texto de `fallo-base-datos` se muestra para cualquier error de base de datos**, no solo al guardar el
+    historial. Conviene dar a registro, perfil y consentimientos mensajes propios, o que el mensaje genérico no
+    mencione disco ni historial.
+
 *(Fin de las fases: este archivo está completo para responderse.)*
 
 ---
@@ -153,7 +171,7 @@
    solo se prueba `dominio/`, que es puro.
 6. 🟢 **Medir el arranque de cámara en CI** con Playwright y una cámara falsa
    (`--use-fake-device-for-media-stream`) para que la latencia no regrese sin que nadie se entere.
-7. 🟢 **Rebranding a Espinker** en una pasada aparte (plan en `/home/dari/.claude/plans/`).
+7. ✅ **Rebranding a Espinker:** hecho en la interfaz el 2026-10-08 (ver `docs/PLAN_REDISENO_ESPINKER.md`, Fase 1). Sigue pendiente renombrar las carpetas del repositorio y el resto de la documentación.
 8. 🟢 **Actualizar `docs/GUIA_DEMO.md`**, desactualizada respecto al modo oficina y al registro con cuenta.
 9. 🟢 **Informe semanal por correo** y **botón "falso positivo"**: backlog del plan; el segundo es barato y
    útil para evaluar umbrales en la tesis.
