@@ -376,7 +376,11 @@ pero la **primera visita** arranca según la preferencia del sistema operativo. 
 `estado/interfaz.ts` pasa a `"claro" | "oscuro"`; quien tenga guardado `"sistema"` se migra una vez
 al valor que corresponda (versión del `persist` de Zustand), sin cambiar la clave de almacenamiento.
 
-### Fase 5 — Retirar los avisos de demostración
+### Fase 5 — Retirar los avisos de demostración ⏭ OMITIDA por decisión del usuario (2026-10-08)
+
+> El usuario pidió saltarla. **Los avisos de DEMOSTRACIÓN siguen en pantalla** (login, panel, ayuda,
+> onboarding, ajustes) y CLAUDE.md §5 y §10 **no se tocaron**: siguen prohibiendo quitarlos. El pedido
+> original (§0, punto 7) queda sin cumplir a propósito. Si se retoma, el detalle de abajo sigue vigente.
 
 | Dónde | Acción |
 |---|---|
@@ -391,7 +395,20 @@ al valor que corresponda (versión del `persist` de Zustand), sin cambiar la cla
 simulados. Ahí, y solo ahí, se etiqueta: el chip "Vista simulada" ya existe sobre el video, y se
 añade "Datos de ejemplo" junto a las cifras mientras la cámara esté apagada.
 
-### Fase 6 — Verificación final
+### Fase 6 — Verificación final ✅ (2026-10-08)
+
+> Resultado: `npm run verificar` en verde (221 tests, build limpio, 0 errores de lint) y `vision-node` 69 tests.
+> Capturas con Chromium por DevTools Protocol (sesión simulada, sin credenciales reales):
+> - `/ingresar` a 1440, 1280, 1024 y 390 px en claro y oscuro: sin desborde horizontal ni errores de consola;
+>   el canvas 3D solo existe desde 1024 px (a 390 px ni se descarga).
+> - Movimiento reducido: la columna queda quieta (0 píxeles de diferencia entre cuadros al mover el mouse)
+>   y el tooltip por vértebra sigue funcionando.
+> - `/` (panel personal) a 1920, 1440, 1366, 1280, 1024 y 390 px, y panel de oficina a 1440 px.
+> - Contraste AA: 66 pruebas automáticas sobre los pares de `index.css` en los dos temas.
+>
+> **No verificado:** el esqueleto sobre el video con una persona real; el panel con una cuenta real de
+> Supabase; el comportamiento en Safari/Firefox (solo se probó Chromium); y el rendimiento de la escena 3D
+> en un equipo sin GPU (se probó con render por software, que funcionó, pero no se midieron cuadros por segundo).
 
 - `npm run verificar` en verde (lint + tests + build), incluidos los tests de arquitectura (sin hex
   crudo, sin `Math.random()`, capas).
@@ -440,7 +457,7 @@ Ninguna función de `dominio/`, `camara/` ni de cálculo de puntaje cambia de co
 | 2 Paleta y tokens | 0 | Medio |
 | 3 Login nuevo + columna 3D | 0, 2 | Grande |
 | 4 Cámara al centro | 2 | Grande |
-| 5 Quitar avisos de demo | — | Pequeño |
+| 5 Quitar avisos de demo ⏭ omitida | — | — |
 | 6 Verificación | Todas | Medio |
 
 Las fases 1 y 5 pueden ir en paralelo con la 0.
@@ -457,7 +474,7 @@ Respondidas el 2026-10-08:
 3. ✅ **Tema:** botón sol/luna de dos estados; la primera visita sigue al sistema operativo.
 4. ✅ **Reglas de `CLAUDE.md`:** se reescriben §5/§10 (aviso de demostración) y §6 (animación
    decorativa, con excepción en el login), como propone §1. Cada regla cambia junto con el código que
-   la necesita: §6 en la Fase 3 (hecho), §5/§10 en la Fase 5.
+   la necesita: §6 en la Fase 3 (hecho); §5/§10 **no cambian**, porque la Fase 5 se omitió.
 5. ✅ **Fondo en móvil:** se oculta.
 6. ✅ **Cabeceras de autoría:** se renombran a Espinker en esta pasada (Fase 1).
 
