@@ -15,7 +15,7 @@ import { Canvas, useLoader } from "@react-three/fiber";
 import { DRACO_GLTF_CONFIG, DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { useColoresColumna } from "./colores";
-import { useInteraccionColumna, type VertebraBajoPuntero } from "./use-interaccion-columna";
+import { useInteraccionColumna, type VertebraBajoPuntero, ZOOM_INICIAL } from "./use-interaccion-columna";
 
 const URL_MODELO = `${import.meta.env.BASE_URL}3d/columna.glb`;
 
@@ -71,7 +71,7 @@ export default function EscenaColumna({
 }) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 14.5], fov: 35 }}
+      camera={{ position: [0, 0, ZOOM_INICIAL], fov: 35 }}
       dpr={[1, 1.5]}
       gl={{ alpha: true, antialias: true }}
       // Con movimiento reducido no hay animacion: se dibuja solo cuando cambia algo.

@@ -116,7 +116,7 @@ Regla única: **el movimiento comunica causa y efecto, o no existe.**
 
 - Transiciones de estado: 300–500 ms con salida suave. El arco del medidor y las barras del desglose interpolan; el resto no se mueve.
 - **Cero animación decorativa dentro de la app.** No hay entradas escalonadas, ni parallax, ni contadores que suben.
-- **Excepción acotada: la pantalla de acceso.** La columna 3D del panel izquierdo oscila despacio, sigue al mouse con parallax (±11° y ±8°, suavizado exponencial) y resalta en madera la vértebra bajo el puntero, con su nombre en un tooltip. Se permite ahí porque nadie está midiendo su postura y no hay estado que el movimiento pueda tapar. Con `prefers-reduced-motion` la columna queda quieta y solo se mantiene el resaltado, que es respuesta directa a la persona.
+- **Excepción acotada: la pantalla de acceso.** La columna 3D del panel izquierdo oscila despacio, sigue al mouse con parallax (±11° y ±8°, suavizado exponencial) y resalta en madera la vértebra bajo el puntero, con su nombre en un tooltip. Se permite ahí porque nadie está midiendo su postura y no hay estado que el movimiento pueda tapar. La columna también se **arrastra para girarla** (vuelta completa, inclinación limitada a ~63°), se acerca y aleja con la **rueda** (zoom de 6 a 26 unidades de cámara) y se restablece con **doble clic**; mientras se arrastra no hay resaltado ni parallax. Con `prefers-reduced-motion` la columna queda quieta por sí sola, y se mantienen el resaltado y el arrastre/zoom, que son respuesta directa a la persona (se aplican en el acto, sin animar).
 - Las gráficas tienen `isAnimationActive={false}`: con datos que llegan cinco veces por segundo, la animación de entrada convierte la gráfica en un temblor.
 - `prefers-reduced-motion: reduce` desactiva todo globalmente (WCAG 2.3.3).
 
@@ -125,6 +125,12 @@ Regla única: **el movimiento comunica causa y efecto, o no existe.**
 Mostrar el puntaje crudo a cinco muestras por segundo hace que el número baile, el semáforo parpadee y el desglose sea ilegible. Se suavizan **las métricas** con τ = 4 s y el puntaje se recalcula a partir de ellas.
 
 Medido tras el cambio: **salto máximo de 1 punto entre ticks** (antes, varios). Y el desglose mantiene **orden fijo**, señalando la peor métrica con una etiqueta en vez de reordenar las filas bajo el cursor.
+
+---
+
+## 5.0 Marco de madera
+
+El mismo marco (borde de 6 px en `--madera-suave`, esquinas muy redondeadas y superficie interior en `--card`) rodea a la cámara en la pantalla principal y al formulario de la pantalla de acceso. Es el detalle de marca que une las dos pantallas.
 
 ---
 

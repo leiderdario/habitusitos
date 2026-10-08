@@ -73,7 +73,7 @@ export function PantallaAutenticacion() {
             {APP.nombre} te avisa a tiempo cuando la postura empieza a cansarte.
           </p>
         </div>
-        <p className="text-panel-suave relative text-xs">
+        <p className="text-panel-suave relative text-[6px] leading-3 italic">
           Modelo 3D:{" "}
           <a
             href="https://github.com/Z-Anatomy/Models-of-human-anatomy"
@@ -90,40 +90,45 @@ export function PantallaAutenticacion() {
       <main className="relative flex items-center justify-center px-4 py-16 sm:px-8">
         <SelectorTema className="absolute top-4 right-4" />
 
-        <div className="w-full max-w-[400px] space-y-6">
-          <div className="flex items-center gap-3">
-            <LogoEspinker className="size-11 rounded-xl" />
-            <div>
-              <h1 className="text-xl font-semibold tracking-tight">{APP.nombre}</h1>
-              <p className="text-muted-foreground text-sm">Cuida tu postura mientras trabajas</p>
+        <div className="w-full max-w-[440px] space-y-4">
+          {/* Marco de madera de bordes gruesos: el mismo que rodea a la camara. */}
+          <div className="border-madera-suave bg-madera-suave rounded-[1.75rem] border-[6px]">
+            <div className="bg-card space-y-6 rounded-[1.375rem] p-5 sm:p-6">
+              <div className="flex items-center gap-3">
+                <LogoEspinker className="size-11 rounded-xl" />
+                <div>
+                  <h1 className="text-xl font-semibold tracking-tight">{APP.nombre}</h1>
+                  <p className="text-muted-foreground text-sm">Cuida tu postura mientras trabajas</p>
+                </div>
+              </div>
+
+              <Tabs defaultValue="ingresar">
+                <TabsList className="h-10 w-full">
+                  <TabsTrigger value="ingresar">Iniciar sesión</TabsTrigger>
+                  <TabsTrigger value="registro">Crear cuenta</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="ingresar" className="mt-5">
+                  <FormularioIngreso
+                    enviando={enviando}
+                    onCorreo={(correo, contrasena) =>
+                      manejar(() => iniciarSesionConCorreo({ correo, contrasena }))
+                    }
+                    onCodigo={(codigo) => manejar(() => iniciarSesionConCodigoOrganizacion(codigo))}
+                  />
+                </TabsContent>
+
+                <TabsContent value="registro" className="mt-5">
+                  <FormularioRegistro
+                    enviando={enviando}
+                    onRegistrar={(datos) => manejar(() => registrarse(datos))}
+                  />
+                </TabsContent>
+              </Tabs>
+
+              {error != null && <EstadoError error={error} />}
             </div>
           </div>
-
-          <Tabs defaultValue="ingresar">
-            <TabsList className="h-10 w-full">
-              <TabsTrigger value="ingresar">Iniciar sesión</TabsTrigger>
-              <TabsTrigger value="registro">Crear cuenta</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="ingresar" className="mt-5">
-              <FormularioIngreso
-                enviando={enviando}
-                onCorreo={(correo, contrasena) =>
-                  manejar(() => iniciarSesionConCorreo({ correo, contrasena }))
-                }
-                onCodigo={(codigo) => manejar(() => iniciarSesionConCodigoOrganizacion(codigo))}
-              />
-            </TabsContent>
-
-            <TabsContent value="registro" className="mt-5">
-              <FormularioRegistro
-                enviando={enviando}
-                onRegistrar={(datos) => manejar(() => registrarse(datos))}
-              />
-            </TabsContent>
-          </Tabs>
-
-          {error != null && <EstadoError error={error} />}
 
           <p className="text-muted-foreground text-center text-xs">{AVISO_DEMO}</p>
         </div>

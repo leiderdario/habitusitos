@@ -204,6 +204,9 @@ regla de no usar rojo/verde como único par en gráficas.
 > - El resaltado cambia el color de la vértebra a madera además del brillo: solo con `emissive` no se notaba.
 > - El botón sol/luna de dos estados (previsto en la Fase 4) se adelantó aquí, porque el login lo necesita.
 > - `AVISO_DEMO` sigue en el login hasta la Fase 5, junto con el resto de avisos y el cambio de regla.
+> - **Ajustes pedidos tras la primera revisión local (2026-10-08):** (1) la columna se arrastra para girarla
+>   (vuelta completa) y se acerca con la rueda; doble clic restablece; (2) el formulario lleva el mismo marco
+>   de madera de 6 px que la cámara; (3) la atribución del modelo pasó a la mitad de tamaño (6 px) y en cursiva.
 > - Verificado en Chromium por el protocolo DevTools: carga, tooltip ("Vértebra torácica 12 · T12"),
 >   resaltado, parallax, ambos temas; a 390 px no se descarga ningún recurso 3D.
 
