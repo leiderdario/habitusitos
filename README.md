@@ -162,7 +162,15 @@ El plan vigente está en [docs/prompt_maestro_multipersona_oficina.md](docs/prom
 
 **AGPL-3.0-only**, heredada de [BatesPosture](https://github.com/wtbates99/batesposture) (wtbates99).
 
-La AGPL es hereditaria: Habitusitos debe distribuirse también bajo AGPL-3.0, **con el código fuente disponible para cualquiera que reciba el programa**. Al entregar el instalador a los participantes de la prueba hay que incluir un enlace al repositorio — no es una recomendación, es lo que exige la licencia.
+La AGPL es hereditaria: Espinker debe distribuirse también bajo AGPL-3.0, **con el código fuente disponible para cualquiera que reciba el programa**. Al entregar el instalador a los participantes de la prueba hay que incluir un enlace al repositorio — no es una recomendación, es lo que exige la licencia.
+
+### Modelo 3D de la columna
+
+`app/public/3d/columna.glb` no es código: es una obra derivada de **Z-Anatomy** (CC BY-SA 4.0) y
+**BodyParts3D** (The Database Center for Life Science, CC BY-SA 2.1 Japón), y se distribuye bajo
+**CC BY-SA 4.0**. La atribución completa y la lista de cambios están en
+[`app/public/3d/LICENCIA.md`](app/public/3d/LICENCIA.md); la pantalla de acceso la muestra al pie del
+panel. Se regenera con [`herramientas/3d/exportar_columna.py`](herramientas/3d/exportar_columna.py).
 
 ---
 

@@ -113,7 +113,7 @@ export function Marco() {
         </nav>
 
         <div className="border-border space-y-2 border-t p-2">
-          <SelectorTema compacta={!abierta} />
+          <SelectorTema conTexto={abierta} className={abierta ? undefined : "w-full"} />
           <Button
             variant="ghost"
             size="sm"

@@ -9,7 +9,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type Tema = "sistema" | "claro" | "oscuro";
+/** Dos estados, un boton sol/luna (decision del 2026-10-08). La primera visita
+ *  arranca segun el sistema operativo; despues manda la eleccion del usuario. */
+export type Tema = "claro" | "oscuro";
+
+function temaDelSistema(): Tema {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "oscuro" : "claro";
+}
 
 interface EstadoInterfaz {
   tema: Tema;
@@ -25,7 +31,7 @@ interface EstadoInterfaz {
 export const useInterfaz = create<EstadoInterfaz>()(
   persist(
     (set, get) => ({
-      tema: "sistema",
+      tema: temaDelSistema(),
       barraLateralAbierta: true,
       avisoPersistenciaVisto: false,
       fijarTema: (tema) => {
@@ -37,29 +43,22 @@ export const useInterfaz = create<EstadoInterfaz>()(
       marcarAvisoPersistenciaVisto: () => set({ avisoPersistenciaVisto: true }),
     }),
     // Nombre anterior a proposito: cambiar la clave borraria el tema guardado.
-    { name: "habitusitos_interfaz_v1" },
+    {
+      name: "habitusitos_interfaz_v1",
+      version: 1,
+      // v0 admitia "sistema": se resuelve una vez al tema que el sistema tenga hoy.
+      migrate: (guardado, version) => {
+        const estado = guardado as { tema?: string };
+        if (version === 0 && estado.tema !== "claro" && estado.tema !== "oscuro") {
+          estado.tema = temaDelSistema();
+        }
+        return estado as EstadoInterfaz;
+      },
+    },
   ),
 );
 
-/**
- * Escribe la clase `dark` en el elemento raiz.
- *
- * Con `sistema` se sigue la preferencia del sistema operativo, que es lo que
- * pide la seccion 9.1: adaptarse al modo claro/oscuro de Windows.
- */
+/** Escribe la clase `dark` en el elemento raiz. */
 export function aplicarTema(tema: Tema): void {
-  const raiz = document.documentElement;
-  const oscuroDelSistema = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const oscuro = tema === "oscuro" || (tema === "sistema" && oscuroDelSistema);
-  raiz.classList.toggle("dark", oscuro);
-}
-
-/** Reacciona a los cambios de tema del sistema mientras la app esta abierta. */
-export function escucharTemaDelSistema(): () => void {
-  const consulta = window.matchMedia("(prefers-color-scheme: dark)");
-  const alCambiar = () => {
-    if (useInterfaz.getState().tema === "sistema") aplicarTema("sistema");
-  };
-  consulta.addEventListener("change", alCambiar);
-  return () => consulta.removeEventListener("change", alCambiar);
+  document.documentElement.classList.toggle("dark", tema === "oscuro");
 }

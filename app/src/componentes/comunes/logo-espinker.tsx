@@ -23,7 +23,7 @@ export function LogoEspinker({ className }: { className?: string }) {
         stroke="currentColor"
         strokeWidth={2}
         strokeLinecap="round"
-        className="size-[1.1rem]"
+        className="size-[56%]"
       >
         <path d="M12 3c-2 3 2 5 0 8s2 5 0 8" />
         <path d="M9 5h6M9.5 9.5h5M9 14h6M9.5 18.5h5" />

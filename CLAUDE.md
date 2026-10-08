@@ -106,7 +106,8 @@ Detalle completo en [docs/SISTEMA_DISENO.md](docs/SISTEMA_DISENO.md).
 - **Gráficas: nunca rojo/verde como único par.** El mapa de calor es monocromo teal.
 - **Valores numéricos de configuración = opciones etiquetadas**, no campos libres. Nadie que no haya escrito el algoritmo sabe qué implica poner el muestreo en 17.
 - **Cifras tabulares** en todo puntaje, duración y métrica, o la fila tiembla al actualizarse.
-- **Cero animación decorativa.** El movimiento comunica causa y efecto o no existe. `prefers-reduced-motion` respetado.
+- **Cero animación decorativa dentro de la app.** El movimiento comunica causa y efecto o no existe. `prefers-reduced-motion` respetado.
+  - **Única excepción (2026-10-08): la columna 3D de la pantalla de acceso** (`componentes/comunes/columna-3d/`). Ahí nadie está midiendo su postura y el movimiento no compite con información de estado. Con `prefers-reduced-motion` queda quieta. No se extiende a otras pantallas sin una decisión explícita del usuario.
 - **Decisiones visuales con varias opciones viables → presentar referencias visuales** y dejar elegir al usuario. Nunca elegir por él ni describir las opciones solo en texto.
 
 ---

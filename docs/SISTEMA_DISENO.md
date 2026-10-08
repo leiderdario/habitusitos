@@ -115,7 +115,8 @@ Sin esto, el ancho de los dígitos cambia al actualizarse y **toda la fila parec
 Regla única: **el movimiento comunica causa y efecto, o no existe.**
 
 - Transiciones de estado: 300–500 ms con salida suave. El arco del medidor y las barras del desglose interpolan; el resto no se mueve.
-- **Cero animación decorativa.** No hay entradas escalonadas, ni parallax, ni contadores que suben.
+- **Cero animación decorativa dentro de la app.** No hay entradas escalonadas, ni parallax, ni contadores que suben.
+- **Excepción acotada: la pantalla de acceso.** La columna 3D del panel izquierdo oscila despacio, sigue al mouse con parallax (±11° y ±8°, suavizado exponencial) y resalta en madera la vértebra bajo el puntero, con su nombre en un tooltip. Se permite ahí porque nadie está midiendo su postura y no hay estado que el movimiento pueda tapar. Con `prefers-reduced-motion` la columna queda quieta y solo se mantiene el resaltado, que es respuesta directa a la persona.
 - Las gráficas tienen `isAnimationActive={false}`: con datos que llegan cinco veces por segundo, la animación de entrada convierte la gráfica en un temblor.
 - `prefers-reduced-motion: reduce` desactiva todo globalmente (WCAG 2.3.3).
 

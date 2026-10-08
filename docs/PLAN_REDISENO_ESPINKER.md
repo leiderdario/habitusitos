@@ -195,7 +195,17 @@ Solo `app/src/index.css` y `docs/SISTEMA_DISENO.md`; ningún componente cambia d
 Se mantienen: los tres canales de estado (color + forma + texto), el mapa de calor monocromo y la
 regla de no usar rojo/verde como único par en gráficas.
 
-### Fase 3 — Pantalla de acceso nueva
+### Fase 3 — Pantalla de acceso nueva ✅ (2026-10-08)
+
+> **Cómo quedó, y en qué se apartó de lo escrito abajo:**
+> - Sin `@react-three/drei`: el modelo se carga con `useLoader` + `GLTFLoader` de three. Una librería menos.
+> - El decodificador Draco no se copia a `public/`: three r186 lo referencia con `new URL(..., import.meta.url)`
+>   y Vite lo empaqueta (`DRACO_GLTF_CONFIG`, 192 kB). Sigue sin depender de una CDN.
+> - El resaltado cambia el color de la vértebra a madera además del brillo: solo con `emissive` no se notaba.
+> - El botón sol/luna de dos estados (previsto en la Fase 4) se adelantó aquí, porque el login lo necesita.
+> - `AVISO_DEMO` sigue en el login hasta la Fase 5, junto con el resto de avisos y el cambio de regla.
+> - Verificado en Chromium por el protocolo DevTools: carga, tooltip ("Vértebra torácica 12 · T12"),
+>   resaltado, parallax, ambos temas; a 390 px no se descarga ningún recurso 3D.
 
 **Distribución (≥ 1024 px):**
 
@@ -427,8 +437,8 @@ Respondidas el 2026-10-08:
    vértebra, resaltado y tooltip al pasar el mouse, y parallax suavizado. Detalle en la Fase 3.
 3. ✅ **Tema:** botón sol/luna de dos estados; la primera visita sigue al sistema operativo.
 4. ✅ **Reglas de `CLAUDE.md`:** se reescriben §5/§10 (aviso de demostración) y §6 (animación
-   decorativa, con excepción en el login), como propone §1. Se aplica junto con la Fase 5, no antes,
-   para que regla y código no se contradigan entre medias.
+   decorativa, con excepción en el login), como propone §1. Cada regla cambia junto con el código que
+   la necesita: §6 en la Fase 3 (hecho), §5/§10 en la Fase 5.
 5. ✅ **Fondo en móvil:** se oculta.
 6. ✅ **Cabeceras de autoría:** se renombran a Espinker en esta pasada (Fase 1).
 

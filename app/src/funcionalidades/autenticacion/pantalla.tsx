@@ -6,16 +6,24 @@
  * ajuste cosmetico. El codigo de organizacion es el segundo metodo de login,
  * pensado para un equipo compartido: fuerza modo "oficina" sin pedir
  * credenciales personales.
+ *
+ * Distribucion (docs/PLAN_REDISENO_ESPINKER.md, Fase 3): a partir de 1024 px, el
+ * 55 % izquierdo es el panel con la columna 3D interactiva y el 45 % derecho el
+ * formulario. Por debajo, solo el formulario.
  */
 
 import { type FormEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CampoSelect } from "@/componentes/comunes/campo-select";
 import { EstadoError } from "@/componentes/comunes/avisos";
+import { FondoColumna } from "@/componentes/comunes/columna-3d/fondo-columna";
+import { LogoEspinker } from "@/componentes/comunes/logo-espinker";
+import { SelectorTema } from "@/componentes/layout/selector-tema";
 import { AVISO_DEMO, APP } from "@/config/app.config";
 import type { ModoUso } from "@/dominio/tipos";
 import { useSesionUsuario } from "@/estado/sesion-usuario";
@@ -53,41 +61,73 @@ export function PantallaAutenticacion() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-sm space-y-5">
-        <div className="space-y-1 text-center">
-          <h1 className="text-xl font-semibold">{APP.nombre}</h1>
-          <p className="text-muted-foreground text-sm">Monitor de postura</p>
+    <div className="bg-background grid min-h-dvh lg:grid-cols-[55fr_45fr]">
+      <aside className="bg-panel text-sobre-panel relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-10">
+        <FondoColumna />
+        {/* El texto no intercepta el puntero: la columna de debajo sigue respondiendo. */}
+        <div className="pointer-events-none relative max-w-[30ch] space-y-2">
+          <p className="text-2xl font-semibold tracking-tight text-balance">
+            Tu espalda trabaja contigo todo el día.
+          </p>
+          <p className="text-panel-suave text-sm text-balance">
+            {APP.nombre} te avisa a tiempo cuando la postura empieza a cansarte.
+          </p>
         </div>
+        <p className="text-panel-suave relative text-xs">
+          Modelo 3D:{" "}
+          <a
+            href="https://github.com/Z-Anatomy/Models-of-human-anatomy"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2"
+          >
+            Z-Anatomy
+          </a>{" "}
+          y BodyParts3D · CC BY-SA 4.0
+        </p>
+      </aside>
 
-        <Tabs defaultValue="ingresar">
-          <TabsList className="w-full">
-            <TabsTrigger value="ingresar">Iniciar sesion</TabsTrigger>
-            <TabsTrigger value="registro">Crear cuenta</TabsTrigger>
-          </TabsList>
+      <main className="relative flex items-center justify-center px-4 py-16 sm:px-8">
+        <SelectorTema className="absolute top-4 right-4" />
 
-          <TabsContent value="ingresar" className="mt-4">
-            <FormularioIngreso
-              enviando={enviando}
-              onCorreo={(correo, contrasena) =>
-                manejar(() => iniciarSesionConCorreo({ correo, contrasena }))
-              }
-              onCodigo={(codigo) => manejar(() => iniciarSesionConCodigoOrganizacion(codigo))}
-            />
-          </TabsContent>
+        <div className="w-full max-w-[400px] space-y-6">
+          <div className="flex items-center gap-3">
+            <LogoEspinker className="size-11 rounded-xl" />
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">{APP.nombre}</h1>
+              <p className="text-muted-foreground text-sm">Cuida tu postura mientras trabajas</p>
+            </div>
+          </div>
 
-          <TabsContent value="registro" className="mt-4">
-            <FormularioRegistro
-              enviando={enviando}
-              onRegistrar={(datos) => manejar(() => registrarse(datos))}
-            />
-          </TabsContent>
-        </Tabs>
+          <Tabs defaultValue="ingresar">
+            <TabsList className="h-10 w-full">
+              <TabsTrigger value="ingresar">Iniciar sesión</TabsTrigger>
+              <TabsTrigger value="registro">Crear cuenta</TabsTrigger>
+            </TabsList>
 
-        {error != null && <EstadoError error={error} />}
+            <TabsContent value="ingresar" className="mt-5">
+              <FormularioIngreso
+                enviando={enviando}
+                onCorreo={(correo, contrasena) =>
+                  manejar(() => iniciarSesionConCorreo({ correo, contrasena }))
+                }
+                onCodigo={(codigo) => manejar(() => iniciarSesionConCodigoOrganizacion(codigo))}
+              />
+            </TabsContent>
 
-        <p className="text-muted-foreground text-center text-xs">{AVISO_DEMO}</p>
-      </div>
+            <TabsContent value="registro" className="mt-5">
+              <FormularioRegistro
+                enviando={enviando}
+                onRegistrar={(datos) => manejar(() => registrarse(datos))}
+              />
+            </TabsContent>
+          </Tabs>
+
+          {error != null && <EstadoError error={error} />}
+
+          <p className="text-muted-foreground text-center text-xs">{AVISO_DEMO}</p>
+        </div>
+      </main>
     </div>
   );
 }
@@ -101,14 +141,13 @@ function FormularioIngreso({
   onCorreo(correo: string, contrasena: string): void;
   onCodigo(codigo: string): void;
 }) {
-  return (
-    <Tabs defaultValue="correo">
-      <TabsList variant="line" className="w-full">
-        <TabsTrigger value="correo">Correo y contrasena</TabsTrigger>
-        <TabsTrigger value="codigo">Codigo de oficina</TabsTrigger>
-      </TabsList>
+  // El codigo de oficina es el camino menos frecuente: un enlace debajo del
+  // formulario en vez de un segundo nivel de pestanas que compite con el primero.
+  const [metodo, setMetodo] = useState<"correo" | "codigo">("correo");
 
-      <TabsContent value="correo" className="mt-4">
+  return (
+    <div className="space-y-4">
+      {metodo === "correo" ? (
         <form
           className="space-y-3"
           onSubmit={(e: FormEvent<HTMLFormElement>) => {
@@ -117,20 +156,25 @@ function FormularioIngreso({
             onCorreo(String(datos.get("correo")), String(datos.get("contrasena")));
           }}
         >
-          <CampoTexto id="correo-ingreso" nombre="correo" etiqueta="Correo" tipo="email" />
+          <CampoTexto
+            id="correo-ingreso"
+            nombre="correo"
+            etiqueta="Correo"
+            tipo="email"
+            autocompletar="email"
+          />
           <CampoTexto
             id="contrasena-ingreso"
             nombre="contrasena"
-            etiqueta="Contrasena"
+            etiqueta="Contraseña"
             tipo="password"
+            autocompletar="current-password"
           />
-          <Button type="submit" className="w-full" disabled={enviando}>
-            {enviando ? "Verificando..." : "Iniciar sesion"}
+          <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
+            {enviando ? "Verificando..." : "Iniciar sesión"}
           </Button>
         </form>
-      </TabsContent>
-
-      <TabsContent value="codigo" className="mt-4">
+      ) : (
         <form
           className="space-y-3"
           onSubmit={(e: FormEvent<HTMLFormElement>) => {
@@ -142,19 +186,31 @@ function FormularioIngreso({
           <CampoTexto
             id="codigo-organizacion"
             nombre="codigo"
-            etiqueta="Codigo de acceso de tu oficina"
+            etiqueta="Código de acceso de tu oficina"
             tipo="text"
+            autocompletar="off"
           />
           <p className="text-muted-foreground text-xs text-balance">
-            Pide este codigo a la persona responsable de tu oficina. Pensado para un computador
+            Pide este código a la persona responsable de tu oficina. Pensado para un computador
             compartido en la sala: no pide tus credenciales personales.
           </p>
-          <Button type="submit" className="w-full" disabled={enviando}>
-            {enviando ? "Verificando..." : "Entrar con el codigo"}
+          <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
+            {enviando ? "Verificando..." : "Entrar con el código"}
           </Button>
         </form>
-      </TabsContent>
-    </Tabs>
+      )}
+
+      <Button
+        type="button"
+        variant="link"
+        className="w-full"
+        onClick={() => setMetodo(metodo === "correo" ? "codigo" : "correo")}
+      >
+        {metodo === "correo"
+          ? "Entrar con el código de tu oficina"
+          : "Entrar con correo y contraseña"}
+      </Button>
+    </div>
   );
 }
 
@@ -186,22 +242,23 @@ function FormularioRegistro({
         });
       }}
     >
-      <CampoTexto id="nombre-registro" nombre="nombre" etiqueta="Nombre" tipo="text" />
-      <CampoTexto id="correo-registro" nombre="correo" etiqueta="Correo" tipo="email" />
+      <CampoTexto id="nombre-registro" nombre="nombre" etiqueta="Nombre" tipo="text" autocompletar="name" />
+      <CampoTexto id="correo-registro" nombre="correo" etiqueta="Correo" tipo="email" autocompletar="email" />
       <CampoTexto
         id="contrasena-registro"
         nombre="contrasena"
-        etiqueta="Contrasena"
+        etiqueta="Contraseña"
         tipo="password"
+        autocompletar="new-password"
       />
       <CampoSelect
         id="modo-uso-registro"
-        etiqueta="Como vas a usarla"
+        etiqueta="Cómo vas a usarla"
         valor={modoUso}
         opciones={OPCIONES_MODO_USO}
         onCambio={(v) => setModoUso(v as ModoUso)}
       />
-      <Button type="submit" className="w-full" disabled={enviando}>
+      <Button type="submit" size="lg" className="h-10 w-full" disabled={enviando}>
         {enviando ? "Creando cuenta..." : "Crear cuenta"}
       </Button>
     </form>
@@ -213,16 +270,43 @@ function CampoTexto({
   nombre,
   etiqueta,
   tipo,
+  autocompletar,
 }: {
   id: string;
   nombre: string;
   etiqueta: string;
   tipo: "email" | "password" | "text";
+  autocompletar: string;
 }) {
+  const [visible, setVisible] = useState(false);
+  const esContrasena = tipo === "password";
+
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{etiqueta}</Label>
-      <Input id={id} name={nombre} type={tipo} required autoComplete="on" />
+      <div className="relative">
+        <Input
+          id={id}
+          name={nombre}
+          type={esContrasena && visible ? "text" : tipo}
+          required
+          autoComplete={autocompletar}
+          className={esContrasena ? "h-10 pr-10" : "h-10"}
+        />
+        {esContrasena && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="absolute top-1 right-1"
+            onClick={() => setVisible(!visible)}
+            aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-pressed={visible}
+          >
+            {visible ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
