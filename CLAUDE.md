@@ -81,7 +81,7 @@ Una capa solo importa de capas anteriores o de sí misma. **Todo esto se verific
 
 El §0.3 del prompt maestro lo exige: el autor debe defender el código ante un jurado.
 
-**Cada archivo declara en su cabecera si es heredado de BatesPosture o aporte propio de Habitusitos, y por qué está donde está.** No es documentación decorativa; es un requisito evaluable.
+**Cada archivo declara en su cabecera si es heredado de BatesPosture o aporte propio de Espinker (antes Habitusitos), y por qué está donde está.** No es documentación decorativa; es un requisito evaluable.
 
 Los aportes de tesis viven en **módulos propios y claramente nombrados**, nunca mezclados dentro de archivos heredados.
 

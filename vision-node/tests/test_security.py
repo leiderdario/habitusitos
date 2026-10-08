@@ -1,4 +1,4 @@
-"""Pruebas del módulo de seguridad (autoría: aporte propio de Habitusitos)."""
+"""Pruebas del módulo de seguridad (autoría: aporte propio de Espinker)."""
 
 import io
 import json

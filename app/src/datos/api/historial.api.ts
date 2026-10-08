@@ -161,7 +161,7 @@ export async function exportarHistorialExcel(): Promise<{ nombre: string; blob: 
   void registrarEvento({ usuario_id: usuarioId, tipo: "exportacion" });
 
   return {
-    nombre: `habitusitos_historial_${hoy}.xlsx`,
+    nombre: `espinker_historial_${hoy}.xlsx`,
     blob: new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }),

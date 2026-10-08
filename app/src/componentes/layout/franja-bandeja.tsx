@@ -12,6 +12,7 @@
 
 import { useEffect, useState } from "react";
 import { Bell, BellOff, Pause, Play, Sparkles } from "lucide-react";
+import { APP } from "@/config/app.config";
 import { useSimulacion } from "@/estado/simulacion";
 import { IconoBandeja } from "@/componentes/comunes/forma-estado";
 import { clasesEstado } from "@/componentes/comunes/insignia-estado";
@@ -42,7 +43,7 @@ export function FranjaBandeja() {
         )}
         // El tooltip textual es el tercer canal en la bandeja, donde no cabe
         // texto visible. Un usuario con daltonismo depende de el.
-        title={`Habitusitos — ${presentacion.etiqueta}`}
+        title={`${APP.nombre} — ${presentacion.etiqueta}`}
       >
         <IconoBandeja forma={presentacion.forma} />
         <span className="text-xs font-medium">{presentacion.etiqueta}</span>
@@ -92,7 +93,7 @@ export function FranjaBandeja() {
  * NOTA PARA EL PRODUCTO REAL: en Python usar `windows-toasts`, no `winotify` —
  * winotify no publica desde febrero de 2022 y no tiene commits desde 2023. Hay
  * que registrar un AppUserModelID en el instalador, o el toast sale como
- * "Python" en vez de con el nombre y el icono de Habitusitos.
+ * "Python" en vez de con el nombre y el icono de Espinker.
  */
 import { reproducirSonidoAlerta } from "@/utils/sonido-alerta";
 

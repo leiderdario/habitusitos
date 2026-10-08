@@ -98,7 +98,7 @@ export const AJUSTES_POR_DEFECTO: Ajustes = {
   datos: {
     guardarHistorial: true,
     guardarMetricasDetalladas: false,
-    rutaBaseDatos: "C:\\Users\\<usuario>\\AppData\\Local\\Habitusitos\\habitusitos.db",
+    rutaBaseDatos: "C:\\Users\\<usuario>\\AppData\\Local\\Espinker\\espinker.db",
   },
   baseline: {
     activo: true,

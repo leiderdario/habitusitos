@@ -4,7 +4,7 @@
  * PROCEDENCIA: este modulo es la traduccion fiel a TypeScript de
  * `batesposture/ml/pose_detector.py::_compute_posture_metrics_from_points` del
  * proyecto original, especificado en la seccion 4.4 del prompt maestro. La
- * formula NO es un aporte de Habitusitos: es codigo heredado que aqui se
+ * formula NO es un aporte de Espinker: es codigo heredado que aqui se
  * reimplementa para que el prototipo calcule exactamente lo mismo que el
  * software real, no una aproximacion.
  *

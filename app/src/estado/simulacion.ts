@@ -14,7 +14,7 @@
  */
 
 import { create } from "zustand";
-import { config, UMBRALES_PATRON } from "@/config/app.config";
+import { APP, config, UMBRALES_PATRON } from "@/config/app.config";
 import type {
   ConfigAlertas,
   EstadoMaquina,
@@ -755,7 +755,7 @@ function procesarMuestra(
 
     notificaciones.push({
       id: siguienteIdNotificacion++,
-      titulo: "Habitusitos",
+      titulo: APP.nombre,
       cuerpo: cuerpoMensaje,
       t,
       tipo: "postura",

@@ -73,7 +73,7 @@ const DOCUMENTOS = [
     para: "Registro de fallos de camara, confusiones en la interfaz y avisos molestos.",
   },
   {
-    archivo: "habitusitos_export_ejemplo.csv",
+    archivo: "espinker_export_ejemplo.csv",
     titulo: "Ejemplo de exportacion de datos",
     quien: "Quien analiza los resultados",
     para: "Formato exacto del CSV de historial, para preparar los scripts de analisis antes.",

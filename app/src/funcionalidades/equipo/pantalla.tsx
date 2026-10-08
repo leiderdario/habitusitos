@@ -1,5 +1,5 @@
 /**
- * Vista de equipo para el rol RRHH/jefe (Fase 8). Aporte propio de Habitusitos.
+ * Vista de equipo para el rol RRHH/jefe (Fase 8). Aporte propio de Espinker.
  *
  * Es gestion de riesgo, no vigilancia nombre por nombre: solo agregados por dia de
  * toda la organizacion, sin ranking de personas. Los dias con pocas fuentes ni

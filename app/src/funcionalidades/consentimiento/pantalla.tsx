@@ -1,5 +1,5 @@
 /**
- * Consentimientos (Fase 8). Aporte propio de Habitusitos.
+ * Consentimientos (Fase 8). Aporte propio de Espinker.
  *
  * El aviso de borrador no se puede cerrar: mientras los textos no pasen por el comite
  * de etica no son un consentimiento informado valido (mismo criterio que el aviso de

@@ -36,6 +36,7 @@ export const useInterfaz = create<EstadoInterfaz>()(
         set({ barraLateralAbierta: !get().barraLateralAbierta }),
       marcarAvisoPersistenciaVisto: () => set({ avisoPersistenciaVisto: true }),
     }),
+    // Nombre anterior a proposito: cambiar la clave borraria el tema guardado.
     { name: "habitusitos_interfaz_v1" },
   ),
 );

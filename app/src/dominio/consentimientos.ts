@@ -1,7 +1,7 @@
 /**
  * Consentimientos: catalogo de textos versionados y calculo del estado vigente.
  *
- * Aporte propio de Habitusitos (Fase 8). Puro, sin imports externos.
+ * Aporte propio de Espinker (Fase 8). Puro, sin imports externos.
  *
  * Los TEXTOS SON UN BORRADOR de ingenieria: no los redacto un abogado ni los reviso
  * el comite de etica. Mientras no pasen esa revision no valen como consentimiento
@@ -32,7 +32,7 @@ export const CATALOGO_CONSENTIMIENTOS: readonly TextoConsentimiento[] = [
     tipo: "camara",
     titulo: "Uso de la camara",
     cuerpo: [
-      "Habitusitos usa la camara para ver tu postura mientras trabajas.",
+      "Espinker usa la camara para ver tu postura mientras trabajas.",
       "No se guarda video ni imagenes: cada cuadro se analiza y se descarta en el momento.",
       "Lo que se guarda es un resumen por dia: minutos monitoreados, puntaje promedio y porcentaje de mala postura.",
       "Puedes apagar la camara cuando quieras y retirar este consentimiento desde Ajustes.",
@@ -46,7 +46,7 @@ export const CATALOGO_CONSENTIMIENTOS: readonly TextoConsentimiento[] = [
     cuerpo: [
       "Tus antecedentes de salud sirven para no sugerirte pausas que no te convienen.",
       "Son datos sensibles: solo los ves tu. Ni tu jefe ni el area de talento humano pueden verlos, ni siquiera sumados con otros.",
-      "Habitusitos no diagnostica ni reemplaza a un profesional de la salud.",
+      "Espinker no diagnostica ni reemplaza a un profesional de la salud.",
       "Es opcional. Sin este consentimiento puedes usar la aplicacion, pero no se guardaran tus antecedentes.",
     ],
     obligatorio: false,

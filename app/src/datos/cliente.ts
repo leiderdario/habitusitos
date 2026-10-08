@@ -10,7 +10,7 @@
  * el punto: las pantallas no se reescriben. Ver ../../docs/DE_MOCK_A_REAL.md.
  */
 
-import { MODO_DATOS, config } from "@/config/app.config";
+import { APP, MODO_DATOS, config } from "@/config/app.config";
 import { ErrorApp } from "@/dominio/tipos";
 import type { CodigoError } from "@/dominio/tipos";
 import { crearAleatorio } from "./semilla";
@@ -75,7 +75,7 @@ export const CATALOGO_ERRORES: Record<
   "camara-no-encontrada": {
     titulo: "No encontramos ninguna camara",
     mensaje:
-      "No hay una camara conectada o Windows no la reconoce. Habitusitos necesita una para medir tu postura.",
+      `No hay una camara conectada o Windows no la reconoce. ${APP.nombre} necesita una para medir tu postura.`,
     accion: "Conectar una camara y reintentar",
   },
   "camara-ocupada": {
@@ -117,7 +117,7 @@ export const CATALOGO_ERRORES: Record<
   "fallo-base-datos": {
     titulo: "No pudimos guardar tu historial",
     mensaje:
-      "El disco puede estar lleno o sin permisos de escritura. Habitusitos sigue funcionando y midiendo, pero esta sesion no quedara guardada.",
+      `El disco puede estar lleno o sin permisos de escritura. ${APP.nombre} sigue funcionando y midiendo, pero esta sesion no quedara guardada.`,
     accion: "Continuar sin guardar historial",
   },
   "fallo-exportacion": {
@@ -179,7 +179,7 @@ export function mensajeDeError(e: unknown): {
   return {
     titulo: "Algo no salio como esperabamos",
     mensaje:
-      "Ocurrio un problema inesperado. Habitusitos sigue funcionando; si se repite, revisa la seccion de ayuda.",
+      `Ocurrio un problema inesperado. ${APP.nombre} sigue funcionando; si se repite, revisa la seccion de ayuda.`,
     accion: "Reintentar",
   };
 }

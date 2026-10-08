@@ -86,7 +86,7 @@ export async function probarCamara(id: number): Promise<{ ok: true }> {
  * original esta calibracion SI guarda `baseline_posture_score`,
  * `baseline_neck_angle` y `baseline_shoulder_level`, pero `pose_detector.py`
  * sigue usando vectores ideales fijos. Es decir, hoy el resultado se guarda y no
- * se usa para nada. Cerrar esa brecha es parte del aporte 1 de Habitusitos.
+ * se usa para nada. Cerrar esa brecha es parte del aporte 1 de Espinker.
  */
 export async function calibrar(): Promise<MetricasPostura> {
   return resolver(

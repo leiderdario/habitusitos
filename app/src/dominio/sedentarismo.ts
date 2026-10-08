@@ -2,7 +2,7 @@
  * Sedentarismo: MET estimado desde la frecuencia cardiaca, calibracion del pulso
  * en reposo y seguimiento de "bouts" (tiempo continuo sentado).
  *
- * Aporte propio de Habitusitos (Fase 7, ver docs/DISENO_PAUSAS_Y_SEDENTARISMO.md).
+ * Aporte propio de Espinker (Fase 7, ver docs/DISENO_PAUSAS_Y_SEDENTARISMO.md).
  * Funciones puras y deterministas: no dependen de si la postura viene de la camara
  * o del reloj, ni de que exista un reloj fisico — se prueban con datos de prueba.
  *

@@ -1,4 +1,4 @@
-"""Pruebas del handshake y los límites del WebSocket (autoría: aporte propio de Habitusitos)."""
+"""Pruebas del handshake y los límites del WebSocket (autoría: aporte propio de Espinker)."""
 
 import asyncio
 import json

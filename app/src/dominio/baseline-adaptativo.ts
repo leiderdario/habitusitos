@@ -1,7 +1,7 @@
 /**
  * Baseline adaptativo por media movil exponencial (EMA).
  *
- * APORTE PROPIO DE HABITUSITOS — no existe en BatesPosture. Es la contribucion 1
+ * APORTE PROPIO DE ESPINKER — no existe en BatesPosture. Es la contribucion 1
  * de la tesis (prompt maestro seccion 11.1) y por eso vive en su propio modulo,
  * separado del motor de puntaje heredado.
  *

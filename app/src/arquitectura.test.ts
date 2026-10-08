@@ -239,4 +239,26 @@ describe("reglas de estilo verificables", () => {
 
     expect(violaciones, violaciones.join("\n")).toEqual([]);
   });
+
+  it("el nombre anterior del producto no reaparece", () => {
+    // El producto se llama Espinker desde 2026-10-08. Solo sobreviven las claves
+    // de localStorage, porque cambiarlas borraria los datos locales de quien ya
+    // usa la app. Cualquier otro "Habitusitos" es un texto olvidado.
+    const violaciones: string[] = [];
+    const indexHtml = {
+      relativa: join("..", "index.html"),
+      contenido: readFileSync(join(RAIZ, "..", "index.html"), "utf8"),
+    };
+
+    for (const archivo of [...ARCHIVOS, indexHtml]) {
+      archivo.contenido.split("\n").forEach((linea, i) => {
+        if (/habitusitos_(demo|interfaz)_v1/.test(linea)) return;
+        if (/habitusitos/i.test(linea)) {
+          violaciones.push(`${archivo.relativa}:${i + 1} → ${linea.trim()}`);
+        }
+      });
+    }
+
+    expect(violaciones, violaciones.join("\n")).toEqual([]);
+  });
 });

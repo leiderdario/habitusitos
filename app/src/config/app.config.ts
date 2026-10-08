@@ -73,7 +73,9 @@ export const config = {
   ANCLA_UTC: Date.UTC(2026, 6, 31, 21, 0, 0),
   /** Dias de historial simulado que alimentan el mapa de calor. */
   DIAS_HISTORIAL: 98,
-  /** Clave de persistencia en localStorage. Subir la version invalida el estado. */
+  /** Clave de persistencia en localStorage. Subir la version invalida el estado.
+   *  Conserva el nombre anterior a proposito: cambiarla borraria los datos locales
+   *  de quien ya usa la app. Es un identificador interno, no texto visible. */
   CLAVE_ALMACENAMIENTO: "habitusitos_demo_v1",
 
   // --- Presentacion ---
@@ -128,8 +130,8 @@ export const MODO_DATOS: "mock" | "http" =
   import.meta.env.VITE_MODO_DATOS === "http" ? "http" : "mock";
 
 export const APP = {
-  nombre: "Habitusitos",
-  nombreLargo: "Habitusitos · Monitor de postura",
+  nombre: "Espinker",
+  nombreLargo: "Espinker · Monitor de postura",
   version: "0.1.0-mock",
   licencia: "AGPL-3.0-only",
   proyectoOriginal: "BatesPosture (wtbates99/batesposture)",

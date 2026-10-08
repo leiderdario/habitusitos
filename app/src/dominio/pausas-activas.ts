@@ -2,7 +2,7 @@
  * Pausas activas: que avisar, cuando, y que ejercicio proponer segun la zona que
  * falla y los antecedentes de salud.
  *
- * Aporte propio de Habitusitos (Fase 7, ver docs/DISENO_PAUSAS_Y_SEDENTARISMO.md).
+ * Aporte propio de Espinker (Fase 7, ver docs/DISENO_PAUSAS_Y_SEDENTARISMO.md).
  * Puro: no muestra nada ni toca el reloj; decide. Quien lo usa (estado/ y la
  * interfaz) ejecuta la decision.
  *

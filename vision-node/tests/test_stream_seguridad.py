@@ -1,4 +1,4 @@
-"""Pruebas del acceso al video (autoría: aporte propio de Habitusitos)."""
+"""Pruebas del acceso al video (autoría: aporte propio de Espinker)."""
 
 import http.client
 import socket

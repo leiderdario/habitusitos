@@ -1,6 +1,6 @@
 """Seguridad del nodo: autenticación con Supabase, tickets de video y lista de fuentes.
 
-Autoría: aporte propio de Habitusitos (no heredado de BatesPosture). Vive en un módulo
+Autoría: aporte propio de Espinker (no heredado de BatesPosture). Vive en un módulo
 aparte para que la defensa de seguridad de la tesis no se mezcle con el código de visión.
 
 Por qué se valida el token CONTRA Supabase (`/auth/v1/user`) y no con la firma del JWT:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Genera los documentos de apoyo para la prueba con usuarios de Habitusitos.
+Genera los documentos de apoyo para la prueba con usuarios de Espinker.
 
 Usa SOLO la biblioteca estandar de Python: sin reportlab, sin fpdf, sin pip
 install. Un script de apoyo que exige instalar dependencias es un script que
@@ -269,7 +269,7 @@ class Documento:
 
         id_info = agregar(
             f"<< /Title ({_escapar(_a_latin1(self.titulo))}) "
-            f"/Producer (Habitusitos - generador de documentos de prueba) >>".encode("latin-1")
+            f"/Producer (Espinker - generador de documentos de prueba) >>".encode("latin-1")
         )
         id_catalogo = agregar(f"<< /Type /Catalog /Pages {id_arbol} 0 R >>".encode("latin-1"))
 
@@ -300,7 +300,7 @@ def encabezado(doc: Documento, titulo: str, subtitulo: str) -> None:
     doc.titulo_principal(titulo)
     doc.parrafo(subtitulo, 9.5)
     doc.parrafo(
-        "Habitusitos - Monitor de postura por webcam | Trabajo de grado, Ingenieria de "
+        "Espinker - Monitor de postura por webcam | Trabajo de grado, Ingenieria de "
         "Software, Universidad de Cartagena",
         8.5,
     )
@@ -313,16 +313,16 @@ def encabezado(doc: Documento, titulo: str, subtitulo: str) -> None:
 
 
 def consentimiento() -> None:
-    doc = Documento("Consentimiento informado - Habitusitos")
+    doc = Documento("Consentimiento informado - Espinker")
     encabezado(
         doc,
         "Consentimiento informado",
-        "Participacion voluntaria en la evaluacion de Habitusitos",
+        "Participacion voluntaria en la evaluacion de Espinker",
     )
 
     doc.subtitulo("Que es esto")
     doc.parrafo(
-        "Te invitamos a participar en la evaluacion de Habitusitos, una aplicacion de "
+        "Te invitamos a participar en la evaluacion de Espinker, una aplicacion de "
         "escritorio para Windows que revisa tu postura mientras trabajas frente al "
         "computador y te avisa cuando llevas un rato en una posicion que te puede cansar. "
         "Tu participacion es completamente voluntaria y puedes retirarte en cualquier "
@@ -409,13 +409,13 @@ def consentimiento() -> None:
     )
 
     doc.pie_en_todas(
-        "Habitusitos - Consentimiento informado - Conserva una copia de este documento."
+        "Espinker - Consentimiento informado - Conserva una copia de este documento."
     )
     doc.guardar(SALIDA / "Consentimiento_Informado.pdf")
 
 
 def protocolo() -> None:
-    doc = Documento("Protocolo de la prueba con usuarios - Habitusitos")
+    doc = Documento("Protocolo de la prueba con usuarios - Espinker")
     encabezado(
         doc,
         "Protocolo de la prueba con usuarios",
@@ -479,15 +479,15 @@ def protocolo() -> None:
         "una prueba son quince minutos perdidos en produccion."
     )
 
-    doc.pie_en_todas("Habitusitos - Protocolo de la prueba con usuarios")
+    doc.pie_en_todas("Espinker - Protocolo de la prueba con usuarios")
     doc.guardar(SALIDA / "Protocolo_Prueba_Usuario.pdf")
 
 
 def guia_rapida() -> None:
-    doc = Documento("Guia rapida - Habitusitos")
+    doc = Documento("Guia rapida - Espinker")
     encabezado(
         doc,
-        "Habitusitos en una pagina",
+        "Espinker en una pagina",
         "Todo lo que necesitas saber para empezar.",
     )
 
@@ -518,7 +518,7 @@ def guia_rapida() -> None:
 
     doc.subtitulo("Donde queda")
     doc.parrafo(
-        "Habitusitos no deja una ventana abierta. Vive abajo a la derecha, junto al reloj. "
+        "Espinker no deja una ventana abierta. Vive abajo a la derecha, junto al reloj. "
         "Haz clic ahi para ver como vas o cambiar algo. Si no lo ves, pulsa la flechita que "
         "muestra los iconos ocultos."
     )
@@ -559,12 +559,12 @@ def guia_rapida() -> None:
         9.5,
     )
 
-    doc.pie_en_todas("Habitusitos - Guia rapida del participante")
+    doc.pie_en_todas("Espinker - Guia rapida del participante")
     doc.guardar(SALIDA / "Guia_Rapida_Participante.pdf")
 
 
 def ficha_incidencias() -> None:
-    doc = Documento("Ficha de incidencias - Habitusitos")
+    doc = Documento("Ficha de incidencias - Espinker")
     encabezado(
         doc,
         "Ficha de incidencias",
@@ -614,7 +614,7 @@ def ficha_incidencias() -> None:
     doc.campo("", 34)
     doc.campo("", 34)
 
-    doc.pie_en_todas("Habitusitos - Ficha de incidencias")
+    doc.pie_en_todas("Espinker - Ficha de incidencias")
     doc.guardar(SALIDA / "Ficha_Incidencias.pdf")
 
 
@@ -632,7 +632,7 @@ def csv_historial() -> None:
     prepare los scripts de analisis lo hara contra este archivo.
     """
     rnd = random.Random(SEMILLA)
-    ruta = SALIDA / "habitusitos_export_ejemplo.csv"
+    ruta = SALIDA / "espinker_export_ejemplo.csv"
 
     with ruta.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, lineterminator="\r\n")
@@ -670,7 +670,7 @@ def csv_benchmark() -> None:
     }
 
     with ruta.open("w", newline="", encoding="utf-8") as f:
-        f.write("# Habitusitos - exportacion de benchmark (DATOS SIMULADOS DEL PROTOTIPO)\r\n")
+        f.write("# Espinker - exportacion de benchmark (DATOS SIMULADOS DEL PROTOTIPO)\r\n")
         f.write("# ATENCION: estas cifras NO pueden citarse en el documento de tesis.\r\n")
         f.write("# equipo,Portatil de gama media / Intel Core i5-1135G7 4C-8T / 8 GB\r\n")
         f.write("# sistema,Windows 11 Pro 24H2\r\n")

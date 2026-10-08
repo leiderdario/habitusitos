@@ -7,11 +7,11 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 3 0 obj
-<< /Length 5583 >>
+<< /Length 5577 >>
 stream
 BT /F2 19.0 Tf 1 0 0 1 56.00 785.89 Tm (Protocolo de la prueba con usuarios) Tj ET
 BT /F1 9.5 Tf 1 0 0 1 56.00 759.89 Tm (Guion para quien aplica la prueba. No es para el participante.) Tj ET
-BT /F1 8.5 Tf 1 0 0 1 56.00 743.19 Tm (Habitusitos - Monitor de postura por webcam | Trabajo de grado, Ingenieria de Software, Universidad de Cartagena) Tj ET
+BT /F1 8.5 Tf 1 0 0 1 56.00 743.19 Tm (Espinker - Monitor de postura por webcam | Trabajo de grado, Ingenieria de Software, Universidad de Cartagena) Tj ET
 q 0.60 w 0.75 0.75 0.75 RG 56.00 723.49 m 539.28 723.49 l S Q
 BT /F2 12.5 Tf 1 0 0 1 56.00 703.49 Tm (Antes de empezar) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 56.00 687.49 Tm (-) Tj ET
@@ -74,7 +74,7 @@ BT /F1 10.0 Tf 1 0 0 1 56.00 125.89 Tm (-) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 70.00 125.89 Tm (No expliques el algoritmo. Si preguntan, responde despues de la prueba.) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 56.00 110.69 Tm (-) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 70.00 110.69 Tm (No corrijas la postura de la persona: falsearias la medicion.) Tj ET
-BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Habitusitos - Protocolo de la prueba con usuarios) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Espinker - Protocolo de la prueba con usuarios) Tj ET
 BT /F1 7.5 Tf 1 0 0 1 493.28 38.00 Tm (Pagina 1 de 2) Tj ET
 endstream
 endobj
@@ -82,14 +82,14 @@ endobj
 << /Type /Page /Parent 7 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
 endobj
 5 0 obj
-<< /Length 601 >>
+<< /Length 598 >>
 stream
 BT /F1 10.0 Tf 1 0 0 1 56.00 785.89 Tm (-) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 70.00 785.89 Tm (No arregles el equipo del participante. Registra el problema y sigue.) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 56.00 770.69 Tm (-) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 70.00 770.69 Tm (No descartes una incidencia por parecer menor. Una confusion de treinta segundos en una) Tj ET
 BT /F1 10.0 Tf 1 0 0 1 70.00 757.49 Tm (prueba son quince minutos perdidos en produccion.) Tj ET
-BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Habitusitos - Protocolo de la prueba con usuarios) Tj ET
+BT /F1 7.5 Tf 1 0 0 1 56.00 38.00 Tm (Espinker - Protocolo de la prueba con usuarios) Tj ET
 BT /F1 7.5 Tf 1 0 0 1 493.28 38.00 Tm (Pagina 2 de 2) Tj ET
 endstream
 endobj
@@ -100,7 +100,7 @@ endobj
 << /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
 endobj
 8 0 obj
-<< /Title (Protocolo de la prueba con usuarios - Habitusitos) /Producer (Habitusitos - generador de documentos de prueba) >>
+<< /Title (Protocolo de la prueba con usuarios - Espinker) /Producer (Espinker - generador de documentos de prueba) >>
 endobj
 9 0 obj
 << /Type /Catalog /Pages 7 0 R >>
@@ -111,14 +111,14 @@ xref
 0000000015 00000 n 
 0000000112 00000 n 
 0000000214 00000 n 
-0000005849 00000 n 
-0000005991 00000 n 
-0000006643 00000 n 
-0000006785 00000 n 
-0000006848 00000 n 
-0000006988 00000 n 
+0000005843 00000 n 
+0000005985 00000 n 
+0000006634 00000 n 
+0000006776 00000 n 
+0000006839 00000 n 
+0000006973 00000 n 
 trailer
 << /Size 10 /Root 9 0 R /Info 8 0 R >>
 startxref
-7037
+7022
 %%EOF

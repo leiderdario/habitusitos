@@ -16,7 +16,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, Info, WifiOff } from "lucide-react";
-import { config } from "@/config/app.config";
+import { APP, config } from "@/config/app.config";
 import {
   exportarHistorialExcel,
   obtenerDiaSemana,
@@ -87,7 +87,7 @@ export function PantallaHistorial() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Historial</h1>
           <p className="text-muted-foreground mt-1 max-w-2xl text-sm text-balance">
-            Tus ultimos {config.DIAS_HISTORIAL} dias. Usaste Habitusitos{" "}
+            Tus ultimos {config.DIAS_HISTORIAL} dias. Usaste {APP.nombre}{" "}
             {conUso.length} dias, con un promedio de{" "}
             <span className="tabular text-foreground font-medium">
               {formatearNumero(promedioGlobal, 1)}

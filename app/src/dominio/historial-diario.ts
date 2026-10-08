@@ -2,7 +2,7 @@
  * Del agregado diario guardado en la base al `DiaHistorial` que consumen las
  * pantallas y el export.
  *
- * Aporte propio de Habitusitos (Fase 5). Puro y sin imports externos, como todo
+ * Aporte propio de Espinker (Fase 5). Puro y sin imports externos, como todo
  * `dominio/`; por eso la ventana de dias llega por parametro y no desde config.
  */
 

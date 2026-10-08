@@ -222,7 +222,7 @@ export interface FilaBaseline {
   /** Si la muestra paso las salvaguardas y se incorporo al EMA. Este campo ES
    *  la evidencia de que el mecanismo anti-deriva funciona. */
   accepted: boolean;
-  /** Aporte propio de Habitusitos: por que se rechazo. No esta en la seccion 12,
+  /** Aporte propio de Espinker: por que se rechazo. No esta en la seccion 12,
    *  pero sin esto una grafica de rechazos no explica nada. */
   motivo: MotivoRechazo | null;
 }
