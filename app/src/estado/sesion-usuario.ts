@@ -11,6 +11,7 @@ import { create } from "zustand";
 import * as auth from "@/datos/api/auth.api";
 import type { CredencialesCorreo, DatosRegistro } from "@/datos/api/auth.api";
 import type { Usuario } from "@/dominio/tipos";
+import { useSimulacion } from "@/estado/simulacion";
 import { supabase } from "@/datos/supabase/cliente";
 
 interface EstadoSesionUsuario {
@@ -82,6 +83,10 @@ export const useSesionUsuario = create<EstadoSesionUsuario>()((set) => {
 
     async cerrarSesion() {
       await auth.cerrarSesion();
+      // Sin esto, la cuenta siguiente en la misma pestana heredaria la sesion
+      // simulada de la anterior: `cargar()` no hace nada si `listo` ya es true.
+      useSimulacion.getState().detener();
+      useSimulacion.setState({ listo: false });
       set({ usuario: null });
     },
   };

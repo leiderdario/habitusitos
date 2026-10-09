@@ -25,6 +25,7 @@ import { useSesionUsuario } from "@/estado/sesion-usuario";
 import { LogoEspinker } from "@/componentes/comunes/logo-espinker";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MenuCuenta } from "./menu-cuenta";
 import { FranjaBandeja, NotificacionesEscritorio } from "./franja-bandeja";
 
 interface ItemNavegacion {
@@ -112,6 +113,7 @@ export function Marco() {
         </nav>
 
         <div className="border-border space-y-2 border-t p-2">
+          <MenuCuenta expandido={abierta} />
           <Button
             variant="ghost"
             size="sm"
@@ -168,6 +170,7 @@ function NavegacionMovil() {
           {texto}
         </NavLink>
       ))}
+      <MenuCuenta compacto />
     </nav>
   );
 }

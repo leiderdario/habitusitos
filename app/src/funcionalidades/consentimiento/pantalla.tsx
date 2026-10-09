@@ -20,6 +20,7 @@ import {
 } from "@/datos/api/consentimientos.api";
 import { useSesionUsuario } from "@/estado/sesion-usuario";
 import { Cargando, EstadoError } from "@/componentes/comunes/avisos";
+import { MenuCuenta } from "@/componentes/layout/menu-cuenta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -65,11 +66,14 @@ export function PantallaConsentimiento() {
   return (
     <div className="bg-background flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="w-full max-w-xl space-y-4">
-        <header className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight">Antes de empezar</h1>
-          <p className="text-muted-foreground text-sm">
-            Lee con calma. Puedes cambiar estas decisiones cuando quieras.
-          </p>
+        <header className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight">Antes de empezar</h1>
+            <p className="text-muted-foreground text-sm">
+              Lee con calma. Puedes cambiar estas decisiones cuando quieras.
+            </p>
+          </div>
+          <MenuCuenta compacto />
         </header>
 
         <div

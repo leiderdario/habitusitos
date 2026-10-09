@@ -38,6 +38,7 @@ import type { DispositivoCamara } from "@/datos/api/sesion.api";
 import { marcarOnboardingCompletado } from "@/datos/api/ajustes.api";
 import { mensajeDeError } from "@/datos/cliente";
 import { AvisoDemo } from "@/componentes/comunes/avisos";
+import { MenuCuenta } from "@/componentes/layout/menu-cuenta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -66,7 +67,10 @@ export function PantallaOnboarding() {
             </span>
             {APP.nombre}
           </span>
-          <AvisoDemo />
+          <div className="flex items-center gap-2">
+            <AvisoDemo />
+            <MenuCuenta compacto />
+          </div>
         </div>
 
         {/* Indicador de progreso: en un flujo de varios pasos hay que saber
